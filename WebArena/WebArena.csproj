@@ -39,8 +39,14 @@
     <Compile Include="App.cs" />
     <Compile Include="AssetManager.cs" />
     <Compile Include="Bsp.cs" />
+    <Compile Include="Globals.cs" />
     <Compile Include="Draw.cs" />
+    <Compile Include="Matrices.cs" />
+    <Compile Include="Mesh.cs" />
+    <Compile Include="Model.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Vectors.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="bridge.json" />

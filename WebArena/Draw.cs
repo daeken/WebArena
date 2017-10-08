@@ -1,15 +1,8 @@
-﻿using Bridge.WebGL;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using static WebArena.Globals;
 
 namespace WebArena {
 	class Draw {
-		WebGLRenderingContext gl;
-		public Draw(WebGLRenderingContext gl) {
-			this.gl = gl;
-
+		public Draw() {
 			gl.ClearColor(0, 0, 1, 1);
 		}
 

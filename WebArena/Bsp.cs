@@ -9,12 +9,13 @@ using static System.Console;
 namespace WebArena {
 	class BspData {
 		public uint[] Indices { get; set; }
+		public float[] VertexPositions { get; set; }
+		public float[] VertexNormals { get; set; }
 	}
-	class Bsp {
+	class Bsp : Model {
 		public Bsp(BspData data) {
-			var indices = new Uint32Array(data.Indices);
-			WriteLine($"Index count: {indices.Length}");
-			WriteLine($"First index {indices[0]}");
+			var mesh = new Mesh(data.Indices, data.VertexPositions, data.VertexNormals);
+			AddMesh(mesh);
 		}
 	}
 }

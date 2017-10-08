@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using System;
 using System.Threading.Tasks;
 using static System.Console;
+using static WebArena.Globals;
 
 namespace WebArena {
 	public class App {
@@ -16,13 +17,14 @@ namespace WebArena {
 		}
 
 		App() {
-			var canvas = new HTMLCanvasElement();
-			canvas.Width = 800;
-			canvas.Height = 600;
+			var canvas = new Bridge.Html5.HTMLCanvasElement {
+				Width = 800,
+				Height = 600
+			};
 			Document.Body.AppendChild(canvas);
 
-			var ctx = canvas.GetContext(CanvasTypes.CanvasContextWebGLType.WebGL).As<WebGLRenderingContext>();
-			draw = new Draw(ctx);
+			gl = canvas.GetContext(CanvasTypes.CanvasContextWebGLType.WebGL).As<WebGLRenderingContext>();
+			draw = new Draw();
 			
 			var _ = LoadAssets();
 
