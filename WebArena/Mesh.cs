@@ -36,7 +36,7 @@ namespace WebArena {
 				}
 				
 				void main() {
-					gl_FragColor = vec4(vec3(calcLight(vec3(.2, -1, 0)) + calcLight(vec3(.3, .75, .5))), 1.0);
+					gl_FragColor = vec4(vec3(calcLight(vec3(.2, -1, 0)) + calcLight(vec3(.3, .75, .5)) + calcLight(vec3(-.3, -.75, -.5))) * 0.75, 1.0);
 				}
 			");
 

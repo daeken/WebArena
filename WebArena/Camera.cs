@@ -18,7 +18,7 @@ namespace WebArena {
 		}
 
 		public void Look(double pitchmod, double yawmod) {
-			Pitch += pitchmod;
+			Pitch = Math.Max(Math.Min(Pitch + pitchmod, Math.PI / 2), -Math.PI / 2);
 			Yaw += yawmod;
 		}
 
