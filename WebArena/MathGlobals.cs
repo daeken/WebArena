@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 
 namespace WebArena {
-	static class MathGlobals {
+	static partial class Globals {
 		public static Vec2 vec2() { return new Vec2(); }
 		public static Vec2 vec2(float v) { return new Vec2(v); }
 		public static Vec2 vec2(double v) { return new Vec2(v); }

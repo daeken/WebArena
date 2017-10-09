@@ -4,6 +4,14 @@ namespace WebArena {
 	public struct Vec2 {
 		public float X, Y;
 		public float Length => (float) Math.Sqrt(X * X + Y * Y);
+		public Vec2 Normalized {
+			get {
+				var len = Length;
+				if(len == 0)
+					return new Vec2();
+				return new Vec2(X / len, Y / len);
+			}
+		}
 		public Vec2 Abs => new Vec2(Math.Abs(X), Math.Abs(Y));
 		public Vec2 Exp => new Vec2(Math.Exp(X), Math.Exp(Y));
 		public Vec2 Log => new Vec2(Math.Log(X), Math.Log(Y));
@@ -65,11 +73,23 @@ namespace WebArena {
 			var temp = this * right;
 			return temp.X + temp.Y;
 		}
+
+		public override string ToString() {
+			return $"Vec2[ {X} {Y} ]";
+		}
 	}
 
 	public struct Vec3 {
 		public float X, Y, Z;
 		public float Length => (float) Math.Sqrt(X * X + Y * Y + Z * Z);
+		public Vec3 Normalized {
+			get {
+				var len = Length;
+				if(len == 0)
+					return new Vec3();
+				return new Vec3(X / len, Y / len, Z / len);
+			}
+		}
 		public Vec3 Abs => new Vec3(Math.Abs(X), Math.Abs(Y), Math.Abs(Z));
 		public Vec3 Exp => new Vec3(Math.Exp(X), Math.Exp(Y), Math.Exp(Z));
 		public Vec3 Log => new Vec3(Math.Log(X), Math.Log(Y), Math.Log(Z));
@@ -129,15 +149,35 @@ namespace WebArena {
 			return left.Dot(right);
 		}
 
+		public static Vec3 operator ^(Vec3 left, Vec3 right) {
+			return left.Cross(right);
+		}
+
 		public float Dot(Vec3 right) {
 			var temp = this * right;
 			return temp.X + temp.Y + temp.Z;
+		}
+
+		public Vec3 Cross(Vec3 right) {
+			return new Vec3(Y * right.Z - Z * right.Y, Z * right.X - X * right.Z, X * right.Y - Y * right.X);
+		}
+
+		public override string ToString() {
+			return $"Vec3[ {X} {Y} {Z} ]";
 		}
 	}
 
 	public struct Vec4 {
 		public float X, Y, Z, W;
 		public float Length => (float) Math.Sqrt(X * X + Y * Y + Z * Z + W * W);
+		public Vec4 Normalized {
+			get {
+				var len = Length;
+				if(len == 0)
+					return new Vec4();
+				return new Vec4(X / len, Y / len, Z / len, W / len);
+			}
+		}
 		public Vec4 Abs => new Vec4(Math.Abs(X), Math.Abs(Y), Math.Abs(Z), Math.Abs(W));
 		public Vec4 Exp => new Vec4(Math.Exp(X), Math.Exp(Y), Math.Exp(Z), Math.Exp(W));
 		public Vec4 Log => new Vec4(Math.Log(X), Math.Log(Y), Math.Log(Z), Math.Log(W));
@@ -202,6 +242,10 @@ namespace WebArena {
 		public float Dot(Vec4 right) {
 			var temp = this * right;
 			return temp.X + temp.Y + temp.Z + temp.W;
+		}
+
+		public override string ToString() {
+			return $"Vec4[ {X} {Y} {Z} {W} ]";
 		}
 	}
 }

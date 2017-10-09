@@ -1,7 +1,7 @@
 ﻿using Bridge.WebGL;
 
 namespace WebArena {
-	static class Globals {
+	static partial class Globals {
 		public static WebGLRenderingContext gl;
 	}
 }
