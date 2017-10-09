@@ -2,8 +2,8 @@
 
 namespace WebArena {
 	public struct Vec2 {
-		public float X, Y;
-		public float Length => (float) Math.Sqrt(X * X + Y * Y);
+		public double X, Y;
+		public double Length => (double) Math.Sqrt(X * X + Y * Y);
 		public Vec2 Normalized {
 			get {
 				var len = Length;
@@ -19,57 +19,48 @@ namespace WebArena {
 		public Vec2 Sqrt => new Vec2(Math.Sqrt(X), Math.Sqrt(Y));
 		public Vec2 InverseSqrt => new Vec2(1 / Math.Sqrt(X), 1 / Math.Sqrt(Y));
 
-		public Vec2(float v) {
+		public Vec2(double v) {
 			X = Y = v;
 		}
 
-		public Vec2(double v) {
-			X = Y = (float) v;
-		}
-
-		public Vec2(float x, float y) {
+		public Vec2(double x, double y) {
 			X = x;
 			Y = y;
 		}
 
-		public Vec2(double x, double y) {
-			X = (float) x;
-			Y = (float) y;
-		}
-
-		public static Vec2 operator +(Vec2 left, float right) {
+		public static Vec2 operator +(Vec2 left, double right) {
 			return new Vec2(left.X + right, left.Y + right);
 		}
 		public static Vec2 operator +(Vec2 left, Vec2 right) {
 			return new Vec2(left.X + right.X, left.Y + right.Y);
 		}
 
-		public static Vec2 operator -(Vec2 left, float right) {
+		public static Vec2 operator -(Vec2 left, double right) {
 			return new Vec2(left.X - right, left.Y - right);
 		}
 		public static Vec2 operator -(Vec2 left, Vec2 right) {
 			return new Vec2(left.X - right.X, left.Y - right.Y);
 		}
 
-		public static Vec2 operator *(Vec2 left, float right) {
+		public static Vec2 operator *(Vec2 left, double right) {
 			return new Vec2(left.X * right, left.Y * right);
 		}
 		public static Vec2 operator *(Vec2 left, Vec2 right) {
 			return new Vec2(left.X * right.X, left.Y * right.Y);
 		}
 
-		public static Vec2 operator /(Vec2 left, float right) {
+		public static Vec2 operator /(Vec2 left, double right) {
 			return new Vec2(left.X / right, left.Y / right);
 		}
 		public static Vec2 operator /(Vec2 left, Vec2 right) {
 			return new Vec2(left.X / right.X, left.Y / right.Y);
 		}
 
-		public static float operator %(Vec2 left, Vec2 right) {
+		public static double operator %(Vec2 left, Vec2 right) {
 			return left.Dot(right);
 		}
 
-		public float Dot(Vec2 right) {
+		public double Dot(Vec2 right) {
 			var temp = this * right;
 			return temp.X + temp.Y;
 		}
@@ -80,8 +71,8 @@ namespace WebArena {
 	}
 
 	public struct Vec3 {
-		public float X, Y, Z;
-		public float Length => (float) Math.Sqrt(X * X + Y * Y + Z * Z);
+		public double X, Y, Z;
+		public double Length => (double) Math.Sqrt(X * X + Y * Y + Z * Z);
 		public Vec3 Normalized {
 			get {
 				var len = Length;
@@ -97,55 +88,45 @@ namespace WebArena {
 		public Vec3 Sqrt => new Vec3(Math.Sqrt(X), Math.Sqrt(Y), Math.Sqrt(Z));
 		public Vec3 InverseSqrt => new Vec3(1 / Math.Sqrt(X), 1 / Math.Sqrt(Y), 1 / Math.Sqrt(Z));
 
-		public Vec3(float v) {
+		public Vec3(double v) {
 			X = Y = Z = v;
 		}
 
-		public Vec3(double v) {
-			X = Y = Z = (float) v;
-		}
-
-		public Vec3(float x, float y, float z) {
+		public Vec3(double x, double y, double z) {
 			X = x;
 			Y = y;
 			Z = z;
 		}
 
-		public Vec3(double x, double y, double z) {
-			X = (float) x;
-			Y = (float) y;
-			Z = (float) z;
-		}
-
-		public static Vec3 operator +(Vec3 left, float right) {
+		public static Vec3 operator +(Vec3 left, double right) {
 			return new Vec3(left.X + right, left.Y + right, left.Z + right);
 		}
 		public static Vec3 operator +(Vec3 left, Vec3 right) {
 			return new Vec3(left.X + right.X, left.Y + right.Y, left.Z + right.Z);
 		}
 
-		public static Vec3 operator -(Vec3 left, float right) {
+		public static Vec3 operator -(Vec3 left, double right) {
 			return new Vec3(left.X - right, left.Y - right, left.Z - right);
 		}
 		public static Vec3 operator -(Vec3 left, Vec3 right) {
 			return new Vec3(left.X - right.X, left.Y - right.Y, left.Z - right.Z);
 		}
 
-		public static Vec3 operator *(Vec3 left, float right) {
+		public static Vec3 operator *(Vec3 left, double right) {
 			return new Vec3(left.X * right, left.Y * right, left.Z * right);
 		}
 		public static Vec3 operator *(Vec3 left, Vec3 right) {
 			return new Vec3(left.X * right.X, left.Y * right.Y, left.Z * right.Z);
 		}
 
-		public static Vec3 operator /(Vec3 left, float right) {
+		public static Vec3 operator /(Vec3 left, double right) {
 			return new Vec3(left.X / right, left.Y / right, left.Z / right);
 		}
 		public static Vec3 operator /(Vec3 left, Vec3 right) {
 			return new Vec3(left.X / right.X, left.Y / right.Y, left.Z / right.Z);
 		}
 
-		public static float operator %(Vec3 left, Vec3 right) {
+		public static double operator %(Vec3 left, Vec3 right) {
 			return left.Dot(right);
 		}
 
@@ -153,7 +134,7 @@ namespace WebArena {
 			return left.Cross(right);
 		}
 
-		public float Dot(Vec3 right) {
+		public double Dot(Vec3 right) {
 			var temp = this * right;
 			return temp.X + temp.Y + temp.Z;
 		}
@@ -168,8 +149,8 @@ namespace WebArena {
 	}
 
 	public struct Vec4 {
-		public float X, Y, Z, W;
-		public float Length => (float) Math.Sqrt(X * X + Y * Y + Z * Z + W * W);
+		public double X, Y, Z, W;
+		public double Length => (double) Math.Sqrt(X * X + Y * Y + Z * Z + W * W);
 		public Vec4 Normalized {
 			get {
 				var len = Length;
@@ -185,61 +166,50 @@ namespace WebArena {
 		public Vec4 Sqrt => new Vec4(Math.Sqrt(X), Math.Sqrt(Y), Math.Sqrt(Z), Math.Sqrt(W));
 		public Vec4 InverseSqrt => new Vec4(1 / Math.Sqrt(X), 1 / Math.Sqrt(Y), 1 / Math.Sqrt(Z), 1 / Math.Sqrt(W));
 
-		public Vec4(float v) {
+		public Vec4(double v) {
 			X = Y = Z = W = v;
 		}
 
-		public Vec4(double v) {
-			X = Y = Z = W = (float) v;
-		}
-
-		public Vec4(float x, float y, float z, float w) {
+		public Vec4(double x, double y, double z, double w) {
 			X = x;
 			Y = y;
 			Z = z;
 			W = w;
 		}
 
-		public Vec4(double x, double y, double z, double w) {
-			X = (float) x;
-			Y = (float) y;
-			Z = (float) z;
-			W = (float) w;
-		}
-
-		public static Vec4 operator +(Vec4 left, float right) {
+		public static Vec4 operator +(Vec4 left, double right) {
 			return new Vec4(left.X + right, left.Y + right, left.Z + right, left.W + right);
 		}
 		public static Vec4 operator +(Vec4 left, Vec4 right) {
 			return new Vec4(left.X + right.X, left.Y + right.Y, left.Z + right.Z, left.W + right.W);
 		}
 
-		public static Vec4 operator -(Vec4 left, float right) {
+		public static Vec4 operator -(Vec4 left, double right) {
 			return new Vec4(left.X - right, left.Y - right, left.Z - right, left.W - right);
 		}
 		public static Vec4 operator -(Vec4 left, Vec4 right) {
 			return new Vec4(left.X - right.X, left.Y - right.Y, left.Z - right.Z, left.W - right.W);
 		}
 
-		public static Vec4 operator *(Vec4 left, float right) {
+		public static Vec4 operator *(Vec4 left, double right) {
 			return new Vec4(left.X * right, left.Y * right, left.Z * right, left.W * right);
 		}
 		public static Vec4 operator *(Vec4 left, Vec4 right) {
 			return new Vec4(left.X * right.X, left.Y * right.Y, left.Z * right.Z, left.W * right.W);
 		}
 
-		public static Vec4 operator /(Vec4 left, float right) {
+		public static Vec4 operator /(Vec4 left, double right) {
 			return new Vec4(left.X / right, left.Y / right, left.Z / right, left.W / right);
 		}
 		public static Vec4 operator /(Vec4 left, Vec4 right) {
 			return new Vec4(left.X / right.X, left.Y / right.Y, left.Z / right.Z, left.W / right.W);
 		}
 
-		public static float operator %(Vec4 left, Vec4 right) {
+		public static double operator %(Vec4 left, Vec4 right) {
 			return left.Dot(right);
 		}
 
-		public float Dot(Vec4 right) {
+		public double Dot(Vec4 right) {
 			var temp = this * right;
 			return temp.X + temp.Y + temp.Z + temp.W;
 		}

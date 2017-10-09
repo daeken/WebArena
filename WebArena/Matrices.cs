@@ -5,10 +5,10 @@ using System.Text;
 
 namespace WebArena {
 	public struct Mat2 {
-		public float _00, _01;
-		public float _10, _11;
+		public double _00, _01;
+		public double _10, _11;
 
-		public float[] AsArray => new float[] {
+		public double[] AsArray => new double[] {
 			_00, _01,
 			_10, _11
 		};
@@ -18,9 +18,9 @@ namespace WebArena {
 			0, 1
 		);
 
-		public static Mat2 Rotation(float angle) {
-			var c = (float) Math.Cos(angle);
-			var s = (float) Math.Sin(angle);
+		public static Mat2 Rotation(double angle) {
+			var c = (double) Math.Cos(angle);
+			var s = (double) Math.Sin(angle);
 			return new Mat2(
 				c, s, 
 				-s,  c
@@ -28,28 +28,28 @@ namespace WebArena {
 		}
 
 		public Mat2(
-				float i_00, float i_01,
-				float i_10, float i_11
+				double i_00, double i_01,
+				double i_10, double i_11
 		) {
 			_00 = i_00; _01 = i_01;
 			_10 = i_10; _11 = i_11;
 		}
 
-		public Mat2 Map(Func<float, float> f) {
+		public Mat2 Map(Func<double, double> f) {
 			return new Mat2(
 				f(_00), f(_01),
 				f(_10), f(_11)
 			);
 		}
 
-		public Mat2 Map(Func<int, float, float> f) {
+		public Mat2 Map(Func<int, double, double> f) {
 			return new Mat2(
 				f(0, _00), f(1, _01),
 				f(2, _10), f(3, _11)
 			);
 		}
 
-		public static Mat2 operator +(Mat2 left, float right) {
+		public static Mat2 operator +(Mat2 left, double right) {
 			return left.Map(x => x + right);
 		}
 		public static Mat2 operator +(Mat2 left, Mat2 right) {
@@ -57,7 +57,7 @@ namespace WebArena {
 			return left.Map((i, x) => x + ra[i]);
 		}
 
-		public static Mat2 operator -(Mat2 left, float right) {
+		public static Mat2 operator -(Mat2 left, double right) {
 			return left.Map(x => x - right);
 		}
 		public static Mat2 operator -(Mat2 left, Mat3 right) {
@@ -65,7 +65,7 @@ namespace WebArena {
 			return left.Map((i, x) => x - ra[i]);
 		}
 
-		public static Mat2 operator *(Mat2 left, float right) {
+		public static Mat2 operator *(Mat2 left, double right) {
 			return left.Map(x => x * right);
 		}
 		public static Vec2 operator *(Mat2 left, Vec2 right) {
@@ -93,11 +93,11 @@ namespace WebArena {
 	}
 
 	public struct Mat3 {
-		public float _00, _01, _02;
-		public float _10, _11, _12;
-		public float _20, _21, _22;
+		public double _00, _01, _02;
+		public double _10, _11, _12;
+		public double _20, _21, _22;
 
-		public float[] AsArray => new float[] {
+		public double[] AsArray => new double[] {
 			_00, _01, _02,
 			_10, _11, _12,
 			_20, _21, _22
@@ -109,17 +109,48 @@ namespace WebArena {
 			0, 0, 1
 		);
 
+		public static Mat3 Yaw(double angle) {
+			var sa = Math.Sin(angle);
+			var ca = Math.Cos(angle);
+
+			return new Mat3(
+				ca, -sa, 0,
+				sa, ca, 0,
+				0, 0, 1
+			);
+		}
+		public static Mat3 Pitch(double angle) {
+			var sa = Math.Sin(angle);
+			var ca = Math.Cos(angle);
+
+			return new Mat3(
+				ca, 0, sa, 
+				0, 1, 0, 
+				-sa, 0, ca
+			);
+		}
+		public static Mat3 Roll(double angle) {
+			var sa = Math.Sin(angle);
+			var ca = Math.Cos(angle);
+
+			return new Mat3(
+				1, 0, 0, 
+				0, ca, -sa, 
+				0, sa, ca
+			);
+		}
+
 		public Mat3(
-				float i_00, float i_01, float i_02, 
-				float i_10, float i_11, float i_12, 
-				float i_20, float i_21, float i_22
+				double i_00, double i_01, double i_02, 
+				double i_10, double i_11, double i_12, 
+				double i_20, double i_21, double i_22
 		) {
 			_00 = i_00; _01 = i_01; _02 = i_02;
 			_10 = i_10; _11 = i_11; _12 = i_12;
 			_20 = i_20; _21 = i_21; _22 = i_22;
 		}
 
-		public Mat3 Map(Func<float, float> f) {
+		public Mat3 Map(Func<double, double> f) {
 			return new Mat3(
 				f(_00), f(_01), f(_02),
 				f(_10), f(_11), f(_12),
@@ -127,7 +158,7 @@ namespace WebArena {
 			);
 		}
 
-		public Mat3 Map(Func<int, float, float> f) {
+		public Mat3 Map(Func<int, double, double> f) {
 			return new Mat3(
 				f(0, _00), f(1, _01), f(2, _02),
 				f(3, _10), f(4, _11), f(5, _12),
@@ -135,7 +166,7 @@ namespace WebArena {
 			);
 		}
 
-		public static Mat3 operator +(Mat3 left, float right) {
+		public static Mat3 operator +(Mat3 left, double right) {
 			return left.Map(x => x + right);
 		}
 		public static Mat3 operator +(Mat3 left, Mat3 right) {
@@ -143,7 +174,7 @@ namespace WebArena {
 			return left.Map((i, x) => x + ra[i]);
 		}
 
-		public static Mat3 operator -(Mat3 left, float right) {
+		public static Mat3 operator -(Mat3 left, double right) {
 			return left.Map(x => x - right);
 		}
 		public static Mat3 operator -(Mat3 left, Mat3 right) {
@@ -151,7 +182,7 @@ namespace WebArena {
 			return left.Map((i, x) => x - ra[i]);
 		}
 
-		public static Mat3 operator *(Mat3 left, float right) {
+		public static Mat3 operator *(Mat3 left, double right) {
 			return left.Map(x => x * right);
 		}
 		public static Vec3 operator *(Mat3 left, Vec3 right) {
@@ -181,12 +212,12 @@ namespace WebArena {
 	}
 
 	public struct Mat4 {
-		public float _00, _01, _02, _03;
-		public float _10, _11, _12, _13;
-		public float _20, _21, _22, _23;
-		public float _30, _31, _32, _33;
+		public double _00, _01, _02, _03;
+		public double _10, _11, _12, _13;
+		public double _20, _21, _22, _23;
+		public double _30, _31, _32, _33;
 
-		public float[] AsArray => new float[] {
+		public double[] AsArray => new double[] {
 			_00, _01, _02, _03, 
 			_10, _11, _12, _13,
 			_20, _21, _22, _23,
@@ -209,8 +240,8 @@ namespace WebArena {
 			);
 		}
 
-		public static Mat4 Perspective(float fovy, float aspect, float near, float far) {
-			var f = (float) (1 / Math.Tan(fovy / 2));
+		public static Mat4 Perspective(double fovy, double aspect, double near, double far) {
+			var f = (double) (1 / Math.Tan(fovy / 2));
 			var nf = 1 / (near - far);
 			return new Mat4(
 				f / aspect, 0, 0, 0, 
@@ -221,10 +252,10 @@ namespace WebArena {
 		}
 
 		public Mat4(
-				float i_00, float i_01, float i_02, float i_03, 
-				float i_10, float i_11, float i_12, float i_13, 
-				float i_20, float i_21, float i_22, float i_23, 
-				float i_30, float i_31, float i_32, float i_33
+				double i_00, double i_01, double i_02, double i_03, 
+				double i_10, double i_11, double i_12, double i_13, 
+				double i_20, double i_21, double i_22, double i_23, 
+				double i_30, double i_31, double i_32, double i_33
 		) {
 			_00 = i_00; _01 = i_01; _02 = i_02; _03 = i_03;
 			_10 = i_10; _11 = i_11; _12 = i_12; _13 = i_13;
@@ -232,7 +263,7 @@ namespace WebArena {
 			_30 = i_30; _31 = i_31; _32 = i_32; _33 = i_33;
 		}
 
-		public Mat4 Map(Func<float, float> f) {
+		public Mat4 Map(Func<double, double> f) {
 			return new Mat4(
 				f(_00), f(_01), f(_02), f(_03), 
 				f(_10), f(_11), f(_12), f(_13), 
@@ -241,7 +272,7 @@ namespace WebArena {
 			);
 		}
 
-		public Mat4 Map(Func<int, float, float> f) {
+		public Mat4 Map(Func<int, double, double> f) {
 			return new Mat4(
 				f(0, _00), f(1, _01), f(2, _02), f(3, _03),
 				f(4, _10), f(5, _11), f(6, _12), f(7, _13),
@@ -250,7 +281,7 @@ namespace WebArena {
 			);
 		}
 
-		public static Mat4 operator +(Mat4 left, float right) {
+		public static Mat4 operator +(Mat4 left, double right) {
 			return left.Map(x => x + right);
 		}
 		public static Mat4 operator +(Mat4 left, Vec3 right) {
@@ -261,7 +292,7 @@ namespace WebArena {
 			return left.Map((i, x) => x + ra[i]);
 		}
 
-		public static Mat4 operator -(Mat4 left, float right) {
+		public static Mat4 operator -(Mat4 left, double right) {
 			return left.Map(x => x - right);
 		}
 		public static Mat4 operator -(Mat4 left, Mat4 right) {
@@ -269,7 +300,7 @@ namespace WebArena {
 			return left.Map((i, x) => x - ra[i]);
 		}
 
-		public static Mat4 operator *(Mat4 left, float right) {
+		public static Mat4 operator *(Mat4 left, double right) {
 			return left.Map(x => x * right);
 		}
 		public static Vec4 operator *(Mat4 left, Vec4 right) {

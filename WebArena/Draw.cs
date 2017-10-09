@@ -5,6 +5,8 @@ namespace WebArena {
 		public Draw() {
 			gl.ClearColor(0, 0, 1, 1);
 			gl.Enable(gl.DEPTH_TEST);
+			gl.Enable(gl.CULL_FACE);
+			gl.CullFace(gl.BACK);
 		}
 
 		public void Render() {

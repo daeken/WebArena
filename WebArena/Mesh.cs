@@ -13,27 +13,34 @@ namespace WebArena {
 			Program = new Program(@"
 				precision highp float;
 				attribute vec4 aVertexPosition;
-				attribute vec4 aVertexNormal;
+				attribute vec3 aVertexNormal;
 
 				uniform mat4 uModelViewMatrix;
 				uniform mat4 uProjectionMatrix;
 
-				varying vec4 vNormal;
+				varying vec3 vNormal;
+				varying vec4 vPosition;
 
 				void main() {
-					gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition.xzyw;
+					vPosition = uModelViewMatrix * aVertexPosition.xzyw;
+					gl_Position = uProjectionMatrix * vPosition;
 					vNormal = aVertexNormal;
 				}
 			", @"
 				precision highp float;
-				varying vec4 vNormal;
+				varying vec3 vNormal;
+				varying vec4 vPosition;
+
+				float calcLight(vec3 lightvec) {
+					return max(dot(vNormal, lightvec), 0.1);
+				}
 				
 				void main() {
-					gl_FragColor = vec4(abs(normalize(vNormal.xyz)), 1.0);
+					gl_FragColor = vec4(vec3(calcLight(vec3(.2, -1, 0)) + calcLight(vec3(.3, .75, .5))), 1.0);
 				}
 			");
 			Program.Use();
-			Program.SetUniform("uProjectionMatrix", Mat4.Perspective(45, 800f / 600, 0.1f, 10000));
+			Program.SetUniform("uProjectionMatrix", Mat4.Perspective(45, 800f / 600, 0.1, 10000));
 
 			IndexBuffer = gl.CreateBuffer();
 			gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, IndexBuffer);
@@ -53,7 +60,7 @@ namespace WebArena {
 		public void Draw() {
 			Program.Use();
 
-			Program.SetUniform("uModelViewMatrix", Mat4.Identity + vec3(0, -50, 100));
+			Program.SetUniform("uModelViewMatrix", PlayerCamera.Matrix);
 
 			gl.BindBuffer(gl.ARRAY_BUFFER, PositionBuffer);
 			var attr = Program.GetAttribute("aVertexPosition");

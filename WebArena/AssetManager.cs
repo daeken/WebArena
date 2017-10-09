@@ -14,7 +14,7 @@ namespace WebArena {
 		public Task<T> Get<T>(string name) {
 			var tcs = new TaskCompletionSource<T>();
 			var xhr = new XMLHttpRequest();
-			xhr.Open("GET", "/" + name);
+			xhr.Open("GET", name);
 			xhr.OnReadyStateChange = () => {
 				if(xhr.ReadyState == AjaxReadyState.Done) {
 					if(xhr.Status == 200)
