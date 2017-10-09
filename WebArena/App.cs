@@ -17,7 +17,7 @@ namespace WebArena {
 		double StartTime, LastTime;
 		double[] RenderTimes;
 		int RTI = 0;
-		Dictionary<int, double> Movement = new Dictionary<int, double>();
+		Dictionary<int, double> KeyState = new Dictionary<int, double>();
 		HTMLCanvasElement Canvas;
 
 		public static void Main() {
@@ -37,11 +37,15 @@ namespace WebArena {
 			Document.Body.AppendChild(Canvas);
 
 			Document.Body.OnKeyDown = (e) => {
-				if(!Movement.ContainsKey(e.KeyCode))
-					Movement[e.KeyCode] = CurTime - StartTime;
+				if(!KeyState.ContainsKey(e.KeyCode))
+					KeyState[e.KeyCode] = CurTime - StartTime;
 			};
 			Document.Body.OnKeyUp = (e) => {
-				Movement.Remove(e.KeyCode);
+				KeyState.Remove(e.KeyCode);
+			};
+
+			Window.OnBlur = (e) => {
+				KeyState.Clear();
 			};
 
 			gl = Canvas.GetContext(CanvasTypes.CanvasContextWebGLType.WebGL).As<WebGLRenderingContext>();
@@ -68,8 +72,8 @@ namespace WebArena {
 		async Task LoadAssets() {
 			try {
 				AM = new AssetManager();
-				var tourney = new Bsp(await AM.Get<BspData>("tourney.json"));
-				Scene.Add(tourney);
+				var map = new Bsp(await AM.Get<BspData>("dm17.json"));
+				Scene.Add(map);
 				OnFrame();
 			} catch(Exception e) {
 				WriteLine(e);
@@ -84,11 +88,11 @@ namespace WebArena {
 			Document.Title = $"WebArena | FPS: {1 / (RenderTimes.Sum() / 120)}";
 			LastTime = Time;
 
-			foreach(var p in Movement) {
+			foreach(var p in KeyState) {
 				var elapsed = Time - p.Value;
 				if(elapsed < 0)
 					break;
-				Movement[p.Key] = Time;
+				KeyState[p.Key] = Time;
 				var movemod = 250;
 				switch(p.Key) {
 					case 87: // W
