@@ -2,7 +2,7 @@
 using static WebArena.Globals;
 
 namespace WebArena {
-	class Model {
+	class Model : IDrawable {
 		List<Mesh> Meshes;
 
 		public Model() {

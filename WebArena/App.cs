@@ -9,8 +9,9 @@ using static WebArena.Globals;
 
 namespace WebArena {
 	public class App {
-		AssetManager am;
-		Draw draw;
+		AssetManager AM;
+		Draw Draw;
+		float StartTime;
 
 		public static void Main() {
 			new App();
@@ -24,24 +25,28 @@ namespace WebArena {
 			Document.Body.AppendChild(canvas);
 
 			gl = canvas.GetContext(CanvasTypes.CanvasContextWebGLType.WebGL).As<WebGLRenderingContext>();
-			draw = new Draw();
+			Scene = new SceneGraph();
+			Draw = new Draw();
 			
 			var _ = LoadAssets();
 
+			StartTime = (float) (new Date().GetTime() / 1000);
 			OnFrame();
 		}
 
 		async Task LoadAssets() {
 			try {
-				am = new AssetManager();
-				var tourney = new Bsp(await am.Get<BspData>("tourney.json"));
+				AM = new AssetManager();
+				var tourney = new Bsp(await AM.Get<BspData>("tourney.json"));
+				Scene.Add(tourney);
 			} catch(Exception e) {
 				WriteLine(e);
 			}
 		}
 
 		void OnFrame() {
-			draw.Render();
+			Time = (float) (new Date().GetTime() / 1000) - StartTime;
+			Draw.Render();
 			Window.RequestAnimationFrame(OnFrame);
 		}
 	}

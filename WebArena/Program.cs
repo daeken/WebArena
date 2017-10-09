@@ -8,12 +8,9 @@ namespace WebArena {
 		WebGLProgram GLProgram;
 
 		public Program(string vs, string fs) {
-			var vss = CompileShader(gl.VERTEX_SHADER, vs);
-			var fss = CompileShader(gl.FRAGMENT_SHADER, fs);
-
 			GLProgram = (WebGLProgram) gl.CreateProgram();
-			gl.AttachShader(GLProgram, vss);
-			gl.AttachShader(GLProgram, fss);
+			gl.AttachShader(GLProgram, CompileShader(gl.VERTEX_SHADER, vs));
+			gl.AttachShader(GLProgram, CompileShader(gl.FRAGMENT_SHADER, fs));
 			gl.LinkProgram(GLProgram);
 
 			if(!(bool) gl.GetProgramParameter(GLProgram, gl.LINK_STATUS)) {
@@ -40,6 +37,10 @@ namespace WebArena {
 
 		public int GetAttribute(string name) {
 			return gl.GetAttribLocation(GLProgram, name);
+		}
+
+		public void SetUniform(string name, Mat4 value) {
+			gl.UniformMatrix4fv(gl.GetUniformLocation(GLProgram, name), false, value.AsArray);
 		}
 	}
 }

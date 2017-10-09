@@ -22,8 +22,8 @@ namespace WebArena {
 			var c = (float) Math.Cos(angle);
 			var s = (float) Math.Sin(angle);
 			return new Mat2(
-				c, -s, 
-				s,  c
+				c, s, 
+				-s,  c
 			);
 		}
 
@@ -200,6 +200,26 @@ namespace WebArena {
 			0, 0, 0, 1
 		);
 
+		public static Mat4 Translation(Vec3 trans) {
+			return new Mat4(
+				1, 0, 0, 0, 
+				0, 1, 0, 0, 
+				0, 0, 1, 0, 
+				trans.X, trans.Y, trans.Z, 1
+			);
+		}
+
+		public static Mat4 Perspective(float fovy, float aspect, float near, float far) {
+			var f = (float) (1 / Math.Tan(fovy / 2));
+			var nf = 1 / (near - far);
+			return new Mat4(
+				f / aspect, 0, 0, 0, 
+				0, f, 0, 0, 
+				0, 0, (far + near) * nf, -1, 
+				0, 0, (2 * far * near) * nf, 0
+			);
+		}
+
 		public Mat4(
 				float i_00, float i_01, float i_02, float i_03, 
 				float i_10, float i_11, float i_12, float i_13, 
@@ -232,6 +252,9 @@ namespace WebArena {
 
 		public static Mat4 operator +(Mat4 left, float right) {
 			return left.Map(x => x + right);
+		}
+		public static Mat4 operator +(Mat4 left, Vec3 right) {
+			return left.Translate(right);
 		}
 		public static Mat4 operator +(Mat4 left, Mat4 right) {
 			var ra = right.AsArray;
@@ -270,6 +293,10 @@ namespace WebArena {
 				la[8] * ra[0] + la[9] * ra[4] + la[10] * ra[8] + la[11] * ra[12], la[8] * ra[1] + la[9] * ra[5] + la[10] * ra[9] + la[11] * ra[13], la[8] * ra[2] + la[9] * ra[6] + la[10] * ra[10] + la[11] * ra[14], la[8] * ra[3] + la[9] * ra[7] + la[10] * ra[11] + la[11] * ra[15],
 				la[12] * ra[0] + la[13] * ra[4] + la[14] * ra[8] + la[15] * ra[12], la[12] * ra[1] + la[13] * ra[5] + la[14] * ra[9] + la[15] * ra[13], la[12] * ra[2] + la[13] * ra[6] + la[14] * ra[10] + la[15] * ra[14], la[12] * ra[3] + la[13] * ra[7] + la[14] * ra[11] + la[15] * ra[15]
 			);
+		}
+
+		public Mat4 Translate(Vec3 trans) {
+			return this * Translation(trans);
 		}
 
 		public override string ToString() {
