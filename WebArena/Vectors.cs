@@ -29,18 +29,30 @@ namespace WebArena {
 			Y = (float) y;
 		}
 
+		public static Vec2 operator +(Vec2 left, float right) {
+			return new Vec2(left.X + right, left.Y + right);
+		}
 		public static Vec2 operator +(Vec2 left, Vec2 right) {
 			return new Vec2(left.X + right.X, left.Y + right.Y);
 		}
 
+		public static Vec2 operator -(Vec2 left, float right) {
+			return new Vec2(left.X - right, left.Y - right);
+		}
 		public static Vec2 operator -(Vec2 left, Vec2 right) {
 			return new Vec2(left.X - right.X, left.Y - right.Y);
 		}
 
+		public static Vec2 operator *(Vec2 left, float right) {
+			return new Vec2(left.X * right, left.Y * right);
+		}
 		public static Vec2 operator *(Vec2 left, Vec2 right) {
 			return new Vec2(left.X * right.X, left.Y * right.Y);
 		}
 
+		public static Vec2 operator /(Vec2 left, float right) {
+			return new Vec2(left.X / right, left.Y / right);
+		}
 		public static Vec2 operator /(Vec2 left, Vec2 right) {
 			return new Vec2(left.X / right.X, left.Y / right.Y);
 		}
@@ -85,18 +97,30 @@ namespace WebArena {
 			Z = (float) z;
 		}
 
+		public static Vec3 operator +(Vec3 left, float right) {
+			return new Vec3(left.X + right, left.Y + right, left.Z + right);
+		}
 		public static Vec3 operator +(Vec3 left, Vec3 right) {
 			return new Vec3(left.X + right.X, left.Y + right.Y, left.Z + right.Z);
 		}
 
+		public static Vec3 operator -(Vec3 left, float right) {
+			return new Vec3(left.X - right, left.Y - right, left.Z - right);
+		}
 		public static Vec3 operator -(Vec3 left, Vec3 right) {
 			return new Vec3(left.X - right.X, left.Y - right.Y, left.Z - right.Z);
 		}
 
+		public static Vec3 operator *(Vec3 left, float right) {
+			return new Vec3(left.X * right, left.Y * right, left.Z * right);
+		}
 		public static Vec3 operator *(Vec3 left, Vec3 right) {
 			return new Vec3(left.X * right.X, left.Y * right.Y, left.Z * right.Z);
 		}
 
+		public static Vec3 operator /(Vec3 left, float right) {
+			return new Vec3(left.X / right, left.Y / right, left.Z / right);
+		}
 		public static Vec3 operator /(Vec3 left, Vec3 right) {
 			return new Vec3(left.X / right.X, left.Y / right.Y, left.Z / right.Z);
 		}
@@ -143,18 +167,30 @@ namespace WebArena {
 			W = (float) w;
 		}
 
+		public static Vec4 operator +(Vec4 left, float right) {
+			return new Vec4(left.X + right, left.Y + right, left.Z + right, left.W + right);
+		}
 		public static Vec4 operator +(Vec4 left, Vec4 right) {
 			return new Vec4(left.X + right.X, left.Y + right.Y, left.Z + right.Z, left.W + right.W);
 		}
 
+		public static Vec4 operator -(Vec4 left, float right) {
+			return new Vec4(left.X - right, left.Y - right, left.Z - right, left.W - right);
+		}
 		public static Vec4 operator -(Vec4 left, Vec4 right) {
 			return new Vec4(left.X - right.X, left.Y - right.Y, left.Z - right.Z, left.W - right.W);
 		}
 
+		public static Vec4 operator *(Vec4 left, float right) {
+			return new Vec4(left.X * right, left.Y * right, left.Z * right, left.W * right);
+		}
 		public static Vec4 operator *(Vec4 left, Vec4 right) {
 			return new Vec4(left.X * right.X, left.Y * right.Y, left.Z * right.Z, left.W * right.W);
 		}
 
+		public static Vec4 operator /(Vec4 left, float right) {
+			return new Vec4(left.X / right, left.Y / right, left.Z / right, left.W / right);
+		}
 		public static Vec4 operator /(Vec4 left, Vec4 right) {
 			return new Vec4(left.X / right.X, left.Y / right.Y, left.Z / right.Z, left.W / right.W);
 		}

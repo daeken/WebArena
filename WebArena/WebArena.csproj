@@ -41,6 +41,7 @@
     <Compile Include="Bsp.cs" />
     <Compile Include="Globals.cs" />
     <Compile Include="Draw.cs" />
+    <Compile Include="MathGlobals.cs" />
     <Compile Include="Matrices.cs" />
     <Compile Include="Mesh.cs" />
     <Compile Include="Model.cs" />
