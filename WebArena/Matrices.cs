@@ -18,6 +18,15 @@ namespace WebArena {
 			0, 1
 		);
 
+		public static Mat2 Rotation(float angle) {
+			var c = (float) Math.Cos(angle);
+			var s = (float) Math.Sin(angle);
+			return new Mat2(
+				c, -s, 
+				s,  c
+			);
+		}
+
 		public Mat2(
 				float i_00, float i_01,
 				float i_10, float i_11
@@ -36,7 +45,7 @@ namespace WebArena {
 		public Mat2 Map(Func<int, float, float> f) {
 			return new Mat2(
 				f(0, _00), f(1, _01),
-				f(3, _10), f(4, _11)
+				f(2, _10), f(3, _11)
 			);
 		}
 
@@ -63,7 +72,7 @@ namespace WebArena {
 			var la = left.AsArray;
 			return new Vec2(
 				la[0] * right.X + la[1] * right.Y,
-				la[3] * right.X + la[4] * right.Y
+				la[2] * right.X + la[3] * right.Y
 			);
 		}
 		public static Vec2 operator *(Vec2 left, Mat2 right) {
