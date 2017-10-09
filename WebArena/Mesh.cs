@@ -39,8 +39,6 @@ namespace WebArena {
 					gl_FragColor = vec4(vec3(calcLight(vec3(.2, -1, 0)) + calcLight(vec3(.3, .75, .5))), 1.0);
 				}
 			");
-			Program.Use();
-			Program.SetUniform("uProjectionMatrix", Mat4.Perspective(45, 800f / 600, 0.1, 10000));
 
 			IndexBuffer = gl.CreateBuffer();
 			gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, IndexBuffer);
@@ -59,7 +57,7 @@ namespace WebArena {
 
 		public void Draw() {
 			Program.Use();
-
+			Program.SetUniform("uProjectionMatrix", ProjectionMatrix);
 			Program.SetUniform("uModelViewMatrix", PlayerCamera.Matrix);
 
 			gl.BindBuffer(gl.ARRAY_BUFFER, PositionBuffer);

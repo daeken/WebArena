@@ -8,5 +8,6 @@ namespace WebArena {
 		public static WebGLRenderingContext gl;
 		public static SceneGraph Scene;
 		public static Camera PlayerCamera;
+		public static Mat4 ProjectionMatrix;
 	}
 }
