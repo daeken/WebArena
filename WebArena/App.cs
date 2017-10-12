@@ -85,7 +85,7 @@ namespace WebArena {
 			var rtime = Time - LastTime;
 			RenderTimes[RTI] = rtime;
 			RTI = (RTI + 1) % 120;
-			Document.Title = $"WebArena | FPS: {1 / (RenderTimes.Sum() / 120)}";
+			Document.Title = $"WebArena | FPS: {Math.Round(1 / (RenderTimes.Sum() / 120))}";
 			LastTime = Time;
 
 			foreach(var p in KeyState) {

@@ -13,9 +13,9 @@ namespace WebArena {
 			Meshes.Add(mesh);
 		}
 
-		public void Draw() {
+		public void Draw(bool transparent) {
 			foreach(var mesh in Meshes)
-				mesh.Draw();
+				mesh.Draw(transparent);
 		}
 	}
 }

@@ -2,7 +2,7 @@
 
 namespace WebArena {
 	interface IDrawable {
-		void Draw();
+		void Draw(bool transparent);
 	}
 
 	class SceneGraph {

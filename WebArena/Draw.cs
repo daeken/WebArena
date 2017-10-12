@@ -5,6 +5,7 @@ namespace WebArena {
 		public Draw() {
 			gl.ClearColor(0, 0, 1, 1);
 			gl.Enable(gl.DEPTH_TEST);
+			gl.DepthFunc(gl.LEQUAL);
 			gl.Enable(gl.CULL_FACE);
 			gl.CullFace(gl.BACK);
 		}
@@ -13,7 +14,9 @@ namespace WebArena {
 			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 			foreach(var drawable in Scene.Drawables)
-				drawable.Draw();
+				drawable.Draw(false);
+			foreach(var drawable in Scene.Drawables)
+				drawable.Draw(true);
 		}
 	}
 }

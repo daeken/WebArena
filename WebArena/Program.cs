@@ -27,6 +27,7 @@ namespace WebArena {
 				return shader;
 			else {
 				WriteLine($"Shader compilation failed: {gl.GetShaderInfoLog(shader)}");
+				WriteLine(code);
 				throw new Exception("Shader compilation failed");
 			}
 		}
@@ -37,6 +38,14 @@ namespace WebArena {
 
 		public int GetAttribute(string name) {
 			return gl.GetAttribLocation(GLProgram, name);
+		}
+
+		public void SetUniform(string name, int value) {
+			gl.Uniform1i(gl.GetUniformLocation(GLProgram, name), value);
+		}
+
+		public void SetUniform(string name, double value) {
+			gl.Uniform1f(gl.GetUniformLocation(GLProgram, name), value);
 		}
 
 		public void SetUniform(string name, Mat4 value) {
