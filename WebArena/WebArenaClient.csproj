@@ -40,6 +40,7 @@
     <Compile Include="AssetManager.cs" />
     <Compile Include="Bsp.cs" />
     <Compile Include="Camera.cs" />
+    <Compile Include="Md3.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Globals.cs" />
     <Compile Include="Draw.cs" />

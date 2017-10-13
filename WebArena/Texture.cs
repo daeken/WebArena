@@ -6,6 +6,16 @@ using static WebArena.Globals;
 namespace WebArena {
 	class Texture {
 		WebGLTexture GTexture;
+
+		static Texture _White = null;
+		public static Texture White {
+			get {
+				if(_White == null)
+					_White = new Texture(new byte[] { 255, 255, 255, 255 }, 1, 1, 4);
+				return _White;
+			}
+		}
+
 		public Texture(string fn, bool clamp) {
 			GTexture = gl.CreateTexture();
 			gl.BindTexture(gl.TEXTURE_2D, GTexture);

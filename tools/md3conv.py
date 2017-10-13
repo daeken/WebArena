@@ -89,39 +89,39 @@ def convert(inp):
 
 	meshes = []
 	for surface in data.surfaces:
+		print surface.shaders
 		this = dict(
-			frames=[], 
-			texcoords=[], 
-			indices=[]
+			Frames=[], 
+			Texcoords=[], 
+			Indices=[]
 		)
 		meshes.append(this)
 		for texcoord in surface.texcoords:
-			this['texcoords'] += texcoord.st
+			this['Texcoords'] += texcoord.st
 
 		off = 0
 		for i in xrange(data.num_frames):
 			vertices = []
-			normals = []
 			for j in xrange(surface.num_verts):
 				vert = surface.vertices[off]
 				off += 1
 				vertices += [x / 64. for x in vert.coord]
-				"""lat = vert.normal[0] * 2 * math.pi / 255.
+				lat = vert.normal[0] * 2 * math.pi / 255.
 				long = vert.normal[1] * 2 * math.pi / 255.
-				normals += [
+				vertices += [
 					math.cos(long) * math.sin(lat), 
 					math.sin(long) * math.sin(lat), 
 					math.cos(lat)
-				]"""
-				normals += vert.normal
-			this['frames'].append((vertices, normals))
+				]
+				#normals += vert.normal
+			this['Frames'].append(vertices)
 
 		for triangle in surface.triangles:
-			this['indices'] += rewind(triangle.indices)
+			this['Indices'] += triangle.indices#rewind(triangle.indices)
 
 	return dict(
-		tags=tags, 
-		meshes=meshes, 
+		Tags=tags, 
+		Meshes=meshes, 
 	)
 
 def main(fn, ofn=None):

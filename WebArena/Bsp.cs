@@ -19,7 +19,7 @@ namespace WebArena {
 		public int MaterialIndex { get; set; }
 		public int LightmapIndex { get; set; }
 		public uint[] Indices { get; set; }
-		public float[] Vertices { get; set; }
+		public double[] Vertices { get; set; }
 	}
 	class BspData {
 		public Dictionary<int, BspMaterialStage[]> Materials { get; set; }
@@ -28,7 +28,6 @@ namespace WebArena {
 	}
 	class Bsp : Model {
 		public Bsp(BspData data) {
-			var white = new Texture(new byte[] { 255, 255, 255, 255 }, 1, 1, 4);
 			var materials = new Dictionary<int, Material[]>();
 			var lightmaps = new Dictionary<int, Texture>();
 			foreach(var pair in data.Materials) {
@@ -50,8 +49,11 @@ namespace WebArena {
 			}
 			foreach(var pair in data.Lightmaps)
 				lightmaps[pair.Key] = new Texture(pair.Value, 128, 128, 3);
-			foreach(var mesh in data.Meshes)
-				AddMesh(new Mesh(mesh.Indices, mesh.Vertices, materials[mesh.MaterialIndex], mesh.LightmapIndex != -1 ? lightmaps[mesh.LightmapIndex] : white));
+			foreach(var mesh in data.Meshes) {
+				var wmesh = new Mesh(mesh.Indices, materials[mesh.MaterialIndex], mesh.LightmapIndex != -1 ? lightmaps[mesh.LightmapIndex] : Texture.White);
+				wmesh.Add(new MeshBuffer(VertexFormat.All, mesh.Vertices));
+				AddMesh(wmesh);
+			}
 		}
 	}
 }

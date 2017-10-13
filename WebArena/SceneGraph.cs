@@ -2,6 +2,7 @@
 
 namespace WebArena {
 	interface IDrawable {
+		void Update();
 		void Draw(bool transparent);
 	}
 
@@ -14,6 +15,11 @@ namespace WebArena {
 
 		public void Add(IDrawable drawable) {
 			Drawables.Add(drawable);
+		}
+
+		public void Update() {
+			foreach(var drawable in Drawables)
+				drawable.Update();
 		}
 	}
 }

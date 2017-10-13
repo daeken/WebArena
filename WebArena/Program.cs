@@ -1,11 +1,13 @@
 ﻿using Bridge.WebGL;
 using System;
+using System.Collections.Generic;
 using static System.Console;
 using static WebArena.Globals;
 
 namespace WebArena {
 	class Program {
 		WebGLProgram GLProgram;
+		Dictionary<string, int> Attributes = new Dictionary<string, int>();
 
 		public Program(string vs, string fs) {
 			GLProgram = (WebGLProgram) gl.CreateProgram();
@@ -37,7 +39,10 @@ namespace WebArena {
 		}
 
 		public int GetAttribute(string name) {
-			return gl.GetAttribLocation(GLProgram, name);
+			if(Attributes.ContainsKey(name))
+				return Attributes[name];
+			else
+				return Attributes[name] = gl.GetAttribLocation(GLProgram, name);
 		}
 
 		public void SetUniform(string name, int value) {

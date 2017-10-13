@@ -54,7 +54,8 @@ namespace WebArena {
 
 			Scene = new SceneGraph();
 			Draw = new Draw();
-			PlayerCamera = new Camera(vec3(0, 50, -100));
+			PlayerCamera = new Camera(vec3(0, 75, -100));
+			PlayerCamera.Yaw = Math.PI;
 			
 			var _ = LoadAssets();
 
@@ -74,6 +75,9 @@ namespace WebArena {
 				AM = new AssetManager();
 				var map = new Bsp(await AM.Get<BspData>("dm17.json"));
 				Scene.Add(map);
+				var md = new Md3(await AM.Get<Md3Data>("upper.json"));
+				md.Position = vec3(0.0, 100.0, 0);
+				Scene.Add(md);
 				OnFrame();
 			} catch(Exception e) {
 				WriteLine(e);
@@ -132,6 +136,7 @@ namespace WebArena {
 			}
 
 			PlayerCamera.Update();
+			Scene.Update();
 			Draw.Render();
 
 			Window.RequestAnimationFrame(OnFrame);
