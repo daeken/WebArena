@@ -171,10 +171,10 @@ def tesselate(size, verts, meshverts):
 
 	return meshverts, verts
 
-def rewind(data):
+def rewind(data, xmod=-1):
 	out = []
 	for i in xrange(0, len(data), 3):
-		out += [data[i+0], data[i+2], data[i+1]]
+		out += [xmod * data[i+0], data[i+2], data[i+1]]
 	return out
 
 def interleave(count, *elems):
@@ -220,6 +220,9 @@ def adjustBrightness(pixels):
 		pixels[i+1] = int(g * scale)
 		pixels[i+2] = int(b * scale)
 	return pixels
+
+def flip(pixels, stride):
+	return reduce(lambda a, x: a + x, [pixels[i - stride:i] for i in xrange(len(pixels), 0, -stride)])
 
 def main(path, mapname):
 	global am
@@ -268,19 +271,19 @@ def main(path, mapname):
 		fmv = [x.offset for x in meshverts[face.meshvert:face.meshvert+face.n_meshverts]]
 		fv = vertices[face.vertex:face.vertex+face.n_vertices]
 		if face.type == 1 or face.type == 3:
-			outindices[face.texture][face.lm_index] += [mv + numverts for mv in fmv]
+			outindices[face.texture][face.lm_index] += rewind([mv + numverts for mv in fmv], 1)
 			for vert in fv:
-				outpositions += vert.position
-				outnormals += vert.normal
+				outpositions += rewind(vert.position)
+				outnormals += rewind(vert.normal)
 				outtexcoords += vert.texcoord
 				outlmcoords += vert.lmcoord
 			numverts += len(fv)
 		elif face.type == 2:
 			fmv, fv = tesselate(face.size, fv, fmv)
-			outindices[face.texture][face.lm_index] += [mv + numverts for mv in fmv]
+			outindices[face.texture][face.lm_index] += rewind([mv + numverts for mv in fmv], 1)
 			for vert in fv:
-				outpositions += vert.position
-				outnormals += vert.normal
+				outpositions += rewind(vert.position)
+				outnormals += rewind(vert.normal)
 				outtexcoords += vert.texcoord
 				outlmcoords += vert.lmcoord
 			numverts += len(fv)

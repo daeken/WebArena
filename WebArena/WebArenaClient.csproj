@@ -49,8 +49,10 @@
     <Compile Include="Matrices.cs" />
     <Compile Include="Mesh.cs" />
     <Compile Include="Model.cs" />
+    <Compile Include="PlayerModel.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Quaternion.cs" />
     <Compile Include="SceneGraph.cs" />
     <Compile Include="Texture.cs" />
     <Compile Include="Vectors.cs" />

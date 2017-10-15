@@ -1,4 +1,5 @@
 import math, sys
+from pprint import pprint
 from Struct import *
 
 @Struct
@@ -67,11 +68,32 @@ def Header(self):
 		surfaces = Surface()[self.num_surfaces]
 	struct_seek(self.ofs_eof, STRUCT_RELATIVE)
 
-def rewind(data):
+def rewind(data, xmod=-1):
 	out = []
 	for i in xrange(0, len(data), 3):
-		out += [data[i+0], data[i+2], data[i+1]]
+		out += [xmod * data[i+0], data[i+2], data[i+1]]
 	return out
+
+def mat2quat(mat):
+	(
+		m11, m12, m13, 
+		m21, m22, m23, 
+		m31, m32, m33
+	) = mat
+	trace = m11 + m22 + m33
+
+	if trace > 0:
+		s = 0.5 / math.sqrt(trace + 1)
+		return (m32 - m23) * s, (m13 - m31) * s, (m21 - m12) * s, 0.25 / s
+	elif m11 > m22 and m11 > m33:
+		s = 2 * math.sqrt(1 + m11 - m22 - m33)
+		return 0.25 * s, (m12 + m21) / s, (m13 + m31) / s, (m32 - m23) / s
+	elif m22 > m33:
+		s = 2 * math.sqrt(1 + m22 - m11 - m33)
+		return (m12 + m21) / s, 0.25 * s, (m23 + m32) / s, (m13 - m31) / s
+	else:
+		s = 2 * math.sqrt(1 + m33 - m11 - m22)
+		return (m13 + m31) / s, (m23 + m32) / s, 0.25 * s, (m21 - m12) / s
 
 def convert(inp):
 	data = Header(inp)
@@ -80,17 +102,19 @@ def convert(inp):
 	for i in xrange(data.num_tags):
 		name = data.tags[i].name
 		this = []
-		tags[name] = this
-
 		for j in xrange(data.num_frames):
 			tag = data.tags[j * data.num_tags + i]
 			assert tag.name == name
-			this.append((tag.origin, tag.axis))
+			this += rewind(tag.origin) + list(mat2quat(tag.axis))
+			#this.append(dict(Position=tag.origin, Rotation=mat2quat(tag.axis)))
+		tags[name] = this
+	#pprint(tags)
 
 	meshes = []
 	for surface in data.surfaces:
-		print surface.shaders
+		print `surface.name`
 		this = dict(
+			Name=surface.name, 
 			Frames=[], 
 			Texcoords=[], 
 			Indices=[]
@@ -105,22 +129,22 @@ def convert(inp):
 			for j in xrange(surface.num_verts):
 				vert = surface.vertices[off]
 				off += 1
-				vertices += [x / 64. for x in vert.coord]
+				vertices += rewind([x / 64. for x in vert.coord])
 				lat = vert.normal[0] * 2 * math.pi / 255.
 				long = vert.normal[1] * 2 * math.pi / 255.
-				vertices += [
+				vertices += rewind([
 					math.cos(long) * math.sin(lat), 
 					math.sin(long) * math.sin(lat), 
 					math.cos(lat)
-				]
+				])
 				#normals += vert.normal
 			this['Frames'].append(vertices)
 
 		for triangle in surface.triangles:
-			this['Indices'] += triangle.indices#rewind(triangle.indices)
+			this['Indices'] += rewind(triangle.indices, 1)
 
 	return dict(
-		Tags=tags, 
+		RawTags=tags, 
 		Meshes=meshes, 
 	)
 

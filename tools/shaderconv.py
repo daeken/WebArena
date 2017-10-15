@@ -203,11 +203,11 @@ def compile(stages):
 				else:
 					texture = findFile(name)
 					if texture is not None:
-						texColor = 'texture2D(uTexSampler, texcoord * vec2(-1., 1.))'
+						texColor = 'texture2D(uTexSampler, texcoord)'
 					clamp = cmd == 'clampmap'
 			elif cmd == 'animmap':
 				animTex = ops
-				texColor = 'texture2D(uTexSampler, texcoord * vec2(-1., 1.))'
+				texColor = 'texture2D(uTexSampler, texcoord)'
 			elif cmd == 'blendfunc':
 				if len(ops) == 1:
 					ops = [ops[0].lower()]
@@ -245,7 +245,7 @@ def compile(stages):
 					tcMods.append('texcoord = rotate(texcoord, %s * uTime)' % ops[0])
 					functions.add('rotate')
 				elif func == 'scale':
-					tcMods.append('texcoord *= vec2(%s, %s)' % (ops[0], ops[1]))
+					tcMods.append('texcoord /= vec2(%s, %s)' % (ops[0], ops[1]))
 				elif func == 'transform':
 					m00, m01, m10, m11, t0, t1 = ops
 					tcMods.append('texcoord = vec2(texcoord.x * %s + texcoord.y * %s + %s, texcoord.x * %s + texcoord.y * %s + %s)' % (m00, m10, t0, m01, m11, t1))
@@ -281,7 +281,7 @@ def compile(stages):
 		elif alphaTest == 'LT128':
 			code.stmt('if(gl_FragColor.a >= 0.5) discard')
 		elif alphaTest == 'GE128':
-			code.stmt('if(gl_FragColor.a < 0.5) discard')
+			code.stmt('if(gl_FragColor.a < 0.9) discard')
 
 		outStages.append(dict(
 			Blend=blendMode, 
@@ -290,6 +290,8 @@ def compile(stages):
 			Clamp=clamp, 
 			FragShader=str(code)
 		))
+		if alphaTest:
+			break
 	return outStages
 
 def main(sdir):

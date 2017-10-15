@@ -4,7 +4,6 @@ using static WebArena.Globals;
 namespace WebArena {
 	class Model : IDrawable {
 		List<Mesh> Meshes;
-		public Vec3 Position;
 
 		public Model() {
 			Meshes = new List<Mesh>();
@@ -14,13 +13,8 @@ namespace WebArena {
 			Meshes.Add(mesh);
 		}
 
-		public void Draw(bool transparent) {
-			PushMatrix();
-			if(Position.Length != 0)
-				TranslateModel(Position);
-			foreach(var mesh in Meshes)
-				mesh.Draw(transparent);
-			PopMatrix();
+		public virtual void Draw(bool transparent) {
+			Meshes.ForEach(x => x.Draw(transparent));
 		}
 
 		public virtual void Update() {

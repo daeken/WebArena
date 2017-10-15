@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using static WebArena.Globals;
 
 namespace WebArena {
 	interface IDrawable {
@@ -6,20 +7,30 @@ namespace WebArena {
 		void Draw(bool transparent);
 	}
 
-	class SceneGraph {
-		public List<IDrawable> Drawables;
-
-		public SceneGraph() {
-			Drawables = new List<IDrawable>();
-		}
+	class Node : IDrawable {
+		public Vec3 Position;
+		public Quaternion Rotation;
+		public List<IDrawable> Children = new List<IDrawable>();
 
 		public void Add(IDrawable drawable) {
-			Drawables.Add(drawable);
+			Children.Add(drawable);
 		}
 
-		public void Update() {
-			foreach(var drawable in Drawables)
-				drawable.Update();
+		public virtual void Update() {
+			Children.ForEach(x => x.Update());
 		}
+
+		public void Draw(bool transparent) {
+			PushMatrix();
+			var temp = ModelMatrix;
+			ModelMatrix = Rotation.ToMatrix();
+			ModelMatrix *= temp;
+			ModelMatrix *= Mat4.Translation(Position);
+			Children.ForEach(x => x.Draw(transparent));
+			PopMatrix();
+		}
+	}
+
+	class SceneGraph : Node {
 	}
 }

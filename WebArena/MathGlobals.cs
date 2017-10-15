@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using static System.Math;
 
 namespace WebArena {
 	static partial class Globals {
@@ -22,5 +19,30 @@ namespace WebArena {
 		public static Vec4 vec4(double v) { return new Vec4(v); }
 		public static Vec4 vec4(float x, float y, float z, float w) { return new Vec4(x, y, z, w); }
 		public static Vec4 vec4(double x, double y, double z, double w) { return new Vec4(x, y, z, w); }
+
+		public static double Clamp(double x, double min, double max) { return Min(Max(x, min), max); }
+		public static double Fract(double x) { return x - Floor(x); }
+
+		public static Vec3 Lerp(Vec3 a, Vec3 b, double x) {
+			return (b - a) * x + a;
+		}
+
+		public static Quaternion Slerp(Quaternion a, Quaternion b, double x) {
+			a = a.Normalized;
+			b = b.Normalized;
+			var dot = a % b;
+			if(Abs(dot) > 0.9995)
+				return (b - a) * x + a;
+			
+			if(dot < 0) {
+				b = -b;
+				dot = -dot;
+			}
+
+			dot = Clamp(dot, -1, 1);
+			var theta = Acos(dot) * x;
+			var c = (b - a * dot).Normalized;
+			return a * Cos(theta) + c * Sin(theta);
+		}
 	}
 }

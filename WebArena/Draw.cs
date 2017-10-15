@@ -13,10 +13,8 @@ namespace WebArena {
 		public void Render() {
 			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-			foreach(var drawable in Scene.Drawables)
-				drawable.Draw(false);
-			foreach(var drawable in Scene.Drawables)
-				drawable.Draw(true);
+			Scene.Draw(false);
+			Scene.Draw(true);
 		}
 	}
 }

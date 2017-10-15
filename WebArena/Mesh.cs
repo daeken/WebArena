@@ -12,7 +12,6 @@ namespace WebArena {
 		Normal = 2, 
 		Texcoord = 4, 
 		LightmapTexcoord = 8, 
-		Second = 16, 
 		All = Position | Normal | Texcoord | LightmapTexcoord
 	}
 
@@ -37,10 +36,10 @@ namespace WebArena {
 				Stride += 2 * 4;
 		}
 
-		public void SetAttributes(Program program) {
+		public void SetAttributes(Program program, int variant) {
 			gl.BindBuffer(gl.ARRAY_BUFFER, Buffer);
 			var off = 0;
-			var suffix = (Format & VertexFormat.Second) == VertexFormat.Second ? "2" : "";
+			var suffix = variant == 0 ? "" : variant.ToString();
 			if((Format & VertexFormat.Position) == VertexFormat.Position) {
 				var attr = program.GetAttribute("aVertexPosition" + suffix);
 				gl.VertexAttribPointer(attr, 3, gl.FLOAT, false, Stride, off);
@@ -71,9 +70,9 @@ namespace WebArena {
 	class Mesh {
 		WebGLBuffer IndexBuffer;
 		int NumIndices;
-		Material[] Materials;
+		public Material[] Materials;
 		Texture Lightmap;
-		protected List<MeshBuffer> Buffers = new List<MeshBuffer>();
+		protected List<Tuple<int, MeshBuffer>> Buffers = new List<Tuple<int, MeshBuffer>>();
 		
 		public Mesh(uint[] indices, Material[] materials, Texture lightmap) {
 			IndexBuffer = gl.CreateBuffer();
@@ -85,15 +84,15 @@ namespace WebArena {
 			Lightmap = lightmap;
 		}
 
-		public void Add(MeshBuffer buffer) {
-			Buffers.Add(buffer);
+		public void Add(MeshBuffer buffer, int variant = 0) {
+			Buffers.Add(new Tuple<int, MeshBuffer>(variant, buffer));
 		}
 
 		public void Draw(bool transparent) {
 			if(Materials[0].Transparent != transparent)
 				return;
 			foreach(var material in Materials) {
-				material.Use(program => Buffers.ForEach(x => x.SetAttributes(program)), Lightmap);
+				material.Use(program => Buffers.ForEach(x => x.Item2.SetAttributes(program, x.Item1)), Lightmap);
 				gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, IndexBuffer);
 				gl.DrawElements(gl.TRIANGLES, NumIndices, gl.UNSIGNED_SHORT, 0);
 			}

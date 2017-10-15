@@ -56,7 +56,7 @@ namespace WebArena {
 					varying vec2 vLmCoord;
 
 					void main() {
-						vPosition = uViewMatrix * uModelMatrix * aVertexPosition.xzyw;
+						vPosition = uViewMatrix * uModelMatrix * aVertexPosition;
 						gl_Position = uProjectionMatrix * vPosition;
 						vNormal = aVertexNormal;
 						vTexCoord = aVertexTexcoord;
@@ -127,7 +127,8 @@ namespace WebArena {
 
 	class AniMaterial : Material {
 		static AniMaterial _FauxDiffuse = null;
-		int Fps;
+		public double Lerp;
+
 		public new static AniMaterial FauxDiffuse {
 			get {
 				if(_FauxDiffuse == null)
@@ -139,8 +140,8 @@ namespace WebArena {
 		public AniMaterial(string fs) : base(null) {
 			Program = new Program(@"
 				precision highp float;
-				attribute vec4 aVertexPosition, aVertexPosition2;
-				attribute vec3 aVertexNormal, aVertexNormal2;
+				attribute vec4 aVertexPosition, aVertexPosition1;
+				attribute vec3 aVertexNormal, aVertexNormal1;
 				attribute vec2 aVertexTexcoord;
 				attribute vec2 aVertexLmcoord;
 
@@ -155,9 +156,9 @@ namespace WebArena {
 				varying vec2 vLmCoord;
 
 				void main() {
-					vPosition = uViewMatrix * uModelMatrix * mix(aVertexPosition, aVertexPosition2, uFrameLerp).xzyw;
+					vPosition = uViewMatrix * uModelMatrix * mix(aVertexPosition, aVertexPosition1, uFrameLerp);
 					gl_Position = uProjectionMatrix * vPosition;
-					vNormal = normalize(mix(aVertexNormal, aVertexNormal2, uFrameLerp));
+					vNormal = normalize(mix(aVertexNormal, aVertexNormal1, uFrameLerp));
 					vTexCoord = aVertexTexcoord;
 					vLmCoord = aVertexLmcoord;
 				}
@@ -167,19 +168,14 @@ namespace WebArena {
 		protected override void DisableAttributes() {
 			gl.DisableVertexAttribArray(Program.GetAttribute("aVertexPosition"));
 			gl.DisableVertexAttribArray(Program.GetAttribute("aVertexNormal"));
-			gl.DisableVertexAttribArray(Program.GetAttribute("aVertexPosition2"));
-			gl.DisableVertexAttribArray(Program.GetAttribute("aVertexNormal2"));
+			gl.DisableVertexAttribArray(Program.GetAttribute("aVertexPosition1"));
+			gl.DisableVertexAttribArray(Program.GetAttribute("aVertexNormal1"));
 			gl.DisableVertexAttribArray(Program.GetAttribute("aVertexTexcoord"));
 			gl.DisableVertexAttribArray(Program.GetAttribute("aVertexLmcoord"));
 		}
 
 		protected override void SetupUniforms() {
-			var sub = Time * Fps;
-			Program.SetUniform("uFrameLerp", sub - Math.Floor(sub));
-		}
-
-		public void SetFPS(int fps) {
-			Fps = fps;
+			Program.SetUniform("uFrameLerp", Lerp);
 		}
 	}
 }
