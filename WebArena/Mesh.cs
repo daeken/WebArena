@@ -89,7 +89,10 @@ namespace WebArena {
 		}
 
 		public void Draw(bool transparent) {
-			if(Materials[0].Transparent != transparent)
+			var isTrans = true;
+			foreach(var material in Materials)
+				isTrans = isTrans && material.Transparent;
+			if(isTrans != transparent)
 				return;
 			foreach(var material in Materials) {
 				material.Use(program => Buffers.ForEach(x => x.Item2.SetAttributes(program, x.Item1)), Lightmap);

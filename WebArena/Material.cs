@@ -12,7 +12,7 @@ namespace WebArena {
 		protected Program Program;
 		double TextureFreq;
 		Texture[] Textures = null;
-		public bool Transparent => BlendSrc != -1;
+		public bool Transparent => BlendSrc != -1 && !(BlendSrc == 1 && BlendDest == 0);
 
 		protected static string FauxDiffuseFS = @"
 			precision highp float;

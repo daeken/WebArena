@@ -181,7 +181,6 @@ def compile(stages):
 	for stageI, stage in enumerate(stages):
 		blendMode = None
 		alphaTest = None
-		tcSource = 'vTexCoord'
 		tcMods = []
 		vertexColor = 'vec3(1.)'
 		texture = None
@@ -190,6 +189,7 @@ def compile(stages):
 		texColor = 'vec4(1.)'
 		lmColor = 'vec4(texture2D(uLmSampler, vLmCoord).xyz, 1.0)'
 		functions = set()
+		tcgen = None
 
 		for elem in stage:
 			cmd, ops = elem[0], elem[1:]
@@ -251,6 +251,10 @@ def compile(stages):
 					tcMods.append('texcoord = vec2(texcoord.x * %s + texcoord.y * %s + %s, texcoord.x * %s + texcoord.y * %s + %s)' % (m00, m10, t0, m01, m11, t1))
 				else:
 					pass#print func
+			elif cmd == 'tcgen':
+				type = ops[0].lower()
+				if type == 'environment':
+					tcgen = type
 			elif cmd == 'alphafunc':
 				alphaTest = ops[0].upper()
 			else:
@@ -262,10 +266,19 @@ def compile(stages):
 		for func in functions:
 			code.function(prebuilts[func])
 		code.uniform('uTime', 'float')
+		code.varying('vPosition', 'vec4')
+		code.varying('vNormal', 'vec3')
 		if texture is not None or animTex is not None:
 			code.uniform('uTexSampler', 'sampler2D')
 			code.varying('vTexCoord', 'vec2')
-			code.stmt('vec2 texcoord = ' + tcSource)
+			if tcgen != 'environment':
+				code.stmt('vec2 texcoord = vTexCoord')
+			else:
+				# Shamelessly stolen from tojicode
+				code.stmt('vec3 viewer = normalize(-vPosition.xyz)')
+				code.stmt('float d = dot(vNormal, viewer)')
+				code.stmt('vec3 reflected = vNormal*2.*d - viewer')
+				code.stmt('vec2 texcoord = vec2(.5, .5) + reflected.xy * .5')
 			for stmt in tcMods:
 				code.stmt(stmt)
 		code.uniform('uLmSampler', 'sampler2D')
