@@ -294,7 +294,7 @@ def main(path, mapname):
 
 	outplanes = []
 	for plane in planes:
-		outplanes.append(dict(Normal=plane.normal, Distance=plane.dist))
+		outplanes.append(dict(Normal=rewind(plane.normal), Distance=plane.dist))
 	outbrushes = []
 	for brush in brushes[model.brush:model.brush+model.n_brushes]:
 		texture = textures[brush.texture]
@@ -306,10 +306,10 @@ def main(path, mapname):
 	def btree(ind):
 		if ind >= 0:
 			node = nodes[ind]
-			return dict(Leaf=False, Plane=node.plane, Mins=node.mins, Maxs=node.maxs, Left=btree(node.children[0]), Right=btree(node.children[1]))
+			return dict(Leaf=False, Plane=node.plane, Mins=rewind(node.mins), Maxs=rewind(node.maxs), Left=btree(node.children[0]), Right=btree(node.children[1]))
 		else:
 			leaf = leafs[-(ind + 1)]
-			return dict(Leaf=True, Plane=-1, Mins=leaf.mins, Maxs=leaf.maxs, Brushes=[x.brush for x in leafbrushes[leaf.leafbrush:leaf.leafbrush+leaf.n_leafbrushes]])
+			return dict(Leaf=True, Plane=-1, Mins=rewind(leaf.mins), Maxs=rewind(leaf.maxs), Brushes=[x.brush for x in leafbrushes[leaf.leafbrush:leaf.leafbrush+leaf.n_leafbrushes]])
 
 	outvertices = interleave(len(outpositions) / 3, outpositions, outnormals, outtexcoords, outlmcoords)
 

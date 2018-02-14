@@ -8,6 +8,8 @@ namespace WebArena {
 
 		public Mat4 Matrix;
 
+		Movement Movement = new Movement();
+
 		public Camera(Vec3 pos) {
 			Pitch = Yaw = 0;
 			Position = pos;
@@ -15,6 +17,8 @@ namespace WebArena {
 
 		public void Move(Vec3 movement) {
 			Position += Mat3.Pitch(Yaw) * Mat3.Roll(Pitch) * movement;
+			Movement.Position = vec3(Position.X, Position.Y, Position.Z);
+			Movement.Move(vec3(0, 0, 0), 0);
 		}
 
 		public void Look(double pitchmod, double yawmod) {

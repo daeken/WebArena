@@ -65,7 +65,7 @@ namespace WebArena {
 		public BspCollisionBrush[] Brushes;
 	}
 	class Bsp : Model {
-		public BspCollisionTree CollisionTree;
+		public readonly BspCollisionTree CollisionTree;
 		
 		public Bsp(BspData data) {
 			var materials = new Dictionary<int, Material[]>();
@@ -106,8 +106,8 @@ namespace WebArena {
 			Plane=node.Plane != -1 ? planes[node.Plane] : null, 
 			Mins=new Vec3(node.Mins), 
 			Maxs=new Vec3(node.Maxs), 
-			Left=ConvertTree(node.Left, planes, brushes), 
-			Right=ConvertTree(node.Right, planes, brushes), 
+			Left=node.Left == null ? null : ConvertTree(node.Left, planes, brushes), 
+			Right=node.Right == null ? null : ConvertTree(node.Right, planes, brushes), 
 			Brushes=node.Brushes.Select(x => brushes[x]).ToArray()
 		};
 	}
