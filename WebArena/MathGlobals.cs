@@ -23,9 +23,8 @@ namespace WebArena {
 		public static double Clamp(double x, double min, double max) { return Min(Max(x, min), max); }
 		public static double Fract(double x) { return x - Floor(x); }
 
-		public static Vec3 Lerp(Vec3 a, Vec3 b, double x) {
-			return (b - a) * x + a;
-		}
+		public static double Lerp(double a, double b, double x) => (b - a) * x + a;
+		public static Vec3 Lerp(Vec3 a, Vec3 b, double x) => (b - a) * x + a;
 
 		public static Quaternion Slerp(Quaternion a, Quaternion b, double x) {
 			a = a.Normalized;

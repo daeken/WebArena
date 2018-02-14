@@ -28,6 +28,16 @@ namespace WebArena {
 			Y = y;
 		}
 
+		public Vec2(double[] v) {
+			X = v[0];
+			Y = v[1];
+		}
+
+		public Vec2(int[] v) {
+			X = v[0];
+			Y = v[1];
+		}
+
 		public static Vec2 operator +(Vec2 left, double right) {
 			return new Vec2(left.X + right, left.Y + right);
 		}
@@ -96,6 +106,18 @@ namespace WebArena {
 			X = x;
 			Y = y;
 			Z = z;
+		}
+
+		public Vec3(double[] v) {
+			X = v[0];
+			Y = v[1];
+			Z = v[2];
+		}
+
+		public Vec3(int[] v) {
+			X = v[0];
+			Y = v[1];
+			Z = v[2];
 		}
 
 		public static Vec3 operator +(Vec3 left, double right) {
@@ -175,6 +197,20 @@ namespace WebArena {
 			Y = y;
 			Z = z;
 			W = w;
+		}
+
+		public Vec4(double[] v) {
+			X = v[0];
+			Y = v[1];
+			Z = v[2];
+			W = v[3];
+		}
+
+		public Vec4(int[] v) {
+			X = v[0];
+			Y = v[1];
+			Z = v[2];
+			W = v[3];
 		}
 
 		public static Vec4 operator +(Vec4 left, double right) {

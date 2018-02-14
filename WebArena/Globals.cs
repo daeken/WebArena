@@ -11,7 +11,8 @@ namespace WebArena {
 		public static Camera PlayerCamera;
 		public static Mat4 ModelMatrix = Mat4.Identity;
 		public static Mat4 ProjectionMatrix;
-		public static Stack<Mat4> MatrixStack = new Stack<Mat4>();
+		static readonly Stack<Mat4> MatrixStack = new Stack<Mat4>();
+		public static Bsp CurrentMap;
 
 		public static void PushMatrix() {
 			MatrixStack.Push(ModelMatrix);

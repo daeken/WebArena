@@ -1,7 +1,5 @@
-﻿using Bridge;
-using Bridge.Html5;
+﻿using Bridge.Html5;
 using Bridge.WebGL;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,13 +10,13 @@ using static WebArena.Extensions;
 
 namespace WebArena {
 	public class App {
-		AssetManager AM;
-		Draw Draw;
-		double StartTime, LastTime;
-		double[] RenderTimes;
-		int RTI = 0;
-		Dictionary<int, double> KeyState = new Dictionary<int, double>();
-		HTMLCanvasElement Canvas;
+		readonly Draw Draw;
+		readonly double StartTime;
+		double LastTime;
+		readonly double[] RenderTimes;
+		int RTI;
+		readonly Dictionary<int, double> KeyState = new Dictionary<int, double>();
+		readonly HTMLCanvasElement Canvas;
 
 		public static void Main() {
 			new App();
@@ -36,21 +34,17 @@ namespace WebArena {
 			Canvas = new HTMLCanvasElement();
 			Document.Body.AppendChild(Canvas);
 
-			Document.Body.OnKeyDown = (e) => {
+			Document.Body.OnKeyDown = e => {
 				if(!KeyState.ContainsKey(e.KeyCode))
 					KeyState[e.KeyCode] = CurTime - StartTime;
 			};
-			Document.Body.OnKeyUp = (e) => {
-				KeyState.Remove(e.KeyCode);
-			};
+			Document.Body.OnKeyUp = e => KeyState.Remove(e.KeyCode);
 
-			Window.OnBlur = (e) => {
-				KeyState.Clear();
-			};
+			Window.OnBlur = e => KeyState.Clear();
 
 			gl = Canvas.GetContext(CanvasTypes.CanvasContextWebGLType.WebGL).As<WebGLRenderingContext>();
 			Resize();
-			Window.OnResize += (e) => Resize();
+			Window.OnResize += e => Resize();
 
 			Scene = new SceneGraph();
 			Draw = new Draw();
@@ -72,11 +66,10 @@ namespace WebArena {
 
 		async Task LoadAssets() {
 			try {
-				AM = new AssetManager();
-				var map = new Bsp(await AM.Get<BspData>("q3tourney2.json"));
+				var map = CurrentMap = new Bsp(await AssetManager.Get<BspData>("q3tourney2.json"));
 				Scene.Add(map);
-				var sarge = new PlayerModel(await AM.Get<Md3Data>("head.json"), await AM.Get<Md3Data>("upper.json"), await AM.Get<Md3Data>("lower.json"));
-				sarge.Position = vec3(100.0, 24.0, 100);
+				var sarge = new PlayerModel(await AssetManager.Get<Md3Data>("head.json"), await AssetManager.Get<Md3Data>("upper.json"),
+					await AssetManager.Get<Md3Data>("lower.json")) {Position = vec3(100.0, 24.0, 100)};
 				Scene.Add(sarge);
 				OnFrame();
 			} catch(Exception e) {
@@ -97,7 +90,7 @@ namespace WebArena {
 				if(elapsed < 0)
 					break;
 				KeyState[p.Key] = Time;
-				var movemod = 250;
+				const int movemod = 250;
 				switch(p.Key) {
 					case 87: // W
 						PlayerCamera.Move(vec3(0, 0, elapsed * -movemod));
@@ -128,9 +121,6 @@ namespace WebArena {
 						break;
 					case 39: // Right
 						PlayerCamera.Look(0, -elapsed * 2);
-						break;
-					default:
-						//WriteLine($"Unknown key pressed: {p.Key}");
 						break;
 				}
 			}

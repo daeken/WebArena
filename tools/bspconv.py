@@ -294,25 +294,22 @@ def main(path, mapname):
 
 	outplanes = []
 	for plane in planes:
-		outplanes.append(plane.normal + [plane.dist])
+		outplanes.append(dict(Normal=plane.normal, Distance=plane.dist))
 	outbrushes = []
 	for brush in brushes[model.brush:model.brush+model.n_brushes]:
 		texture = textures[brush.texture]
 		# XXX: Rewrite file so non-solid brushes are nuked.
 		collidable = (texture.content_flags & 1) == 1
 		sides = brushsides[brush.brushside:brush.brushside+brush.n_brushsides]
-		outbrushes.append([collidable, []])
-		curbrush = outbrushes[-1][1]
-		for side in sides:
-			curbrush.append(side.plane)
+		outbrushes.append(dict(Collidable=collidable, Planes=[side.plane for side in sides]))
 
 	def btree(ind):
 		if ind >= 0:
 			node = nodes[ind]
-			return [0, node.plane, node.mins, node.maxs, btree(node.children[0]), btree(node.children[1])]
+			return dict(Leaf=False, Plane=node.plane, Mins=node.mins, Maxs=node.maxs, Left=btree(node.children[0]), Right=btree(node.children[1]))
 		else:
 			leaf = leafs[-(ind + 1)]
-			return [1, leaf.mins, leaf.maxs, [x.brush for x in leafbrushes[leaf.leafbrush:leaf.leafbrush+leaf.n_leafbrushes]]]
+			return dict(Leaf=True, Plane=-1, Mins=leaf.mins, Maxs=leaf.maxs, Brushes=[x.brush for x in leafbrushes[leaf.leafbrush:leaf.leafbrush+leaf.n_leafbrushes]])
 
 	outvertices = interleave(len(outpositions) / 3, outpositions, outnormals, outtexcoords, outlmcoords)
 
