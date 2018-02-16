@@ -7,6 +7,7 @@ namespace WebArena {
 		public double Pitch, Yaw;
 
 		public Mat4 Matrix;
+		Mat3 LookRotation = Mat3.Identity;
 
 		Movement Movement = new Movement();
 
@@ -16,32 +17,21 @@ namespace WebArena {
 		}
 
 		public void Move(Vec3 movement) {
-			Position += Mat3.Pitch(Yaw) * Mat3.Roll(Pitch) * movement;
-			Movement.Position = vec3(Position.X, Position.Y, Position.Z);
+			Position += LookRotation * movement;
+			Movement.Position = Position;
 			Movement.Move(vec3(0, 0, 0), 0);
 		}
 
 		public void Look(double pitchmod, double yawmod) {
-			Pitch = Math.Max(Math.Min(Pitch + pitchmod, Math.PI / 2), -Math.PI / 2);
+			var eps = 0.0000001;
+			Pitch = Clamp(Pitch + pitchmod, -Math.PI / 2 + eps, Math.PI / 2 - eps);
 			Yaw += yawmod;
+			LookRotation = Mat3.Yaw(Yaw) * Mat3.Roll(Pitch);
 		}
 
 		public void Update() {
-			var cp = Math.Cos(Pitch);
-			var sp = Math.Sin(Pitch);
-			var cy = Math.Cos(Yaw);
-			var sy = Math.Sin(Yaw);
-
-			var xa = vec3(cy, 0, -sy);
-			var ya = vec3(sy * sp, cp, cy * sp);
-			var za = vec3(sy * cp, -sp, cp * cy);
-
-			Matrix = new Mat4(
-				xa.X, ya.X, za.X, 0, 
-				xa.Y, ya.Y, za.Y, 0, 
-				xa.Z, ya.Z, za.Z, 0, 
-				-xa.Dot(Position), -ya.Dot(Position), -za.Dot(Position), 1
-			);
+			var at = (LookRotation * vec3(0, 1, 0)).Normalized;
+			Matrix = Mat4.LookAt(Position, Position + at, vec3(0, 0, 1));
 		}
 	}
 }

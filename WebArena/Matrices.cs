@@ -251,6 +251,19 @@ namespace WebArena {
 			);
 		}
 
+		public static Mat4 LookAt(Vec3 Eye, Vec3 At, Vec3 Up) {
+			var za = (At - Eye).Normalized;
+			var xa = (Up ^ za).Normalized;
+			var ya = za ^ xa;
+
+			return new Mat4(
+				xa.X, ya.X, za.X, 0, 
+				xa.Y, ya.Y, za.Y, 0, 
+				xa.Z, ya.Z, za.Z, 0, 
+				-(xa % Eye), -(ya % Eye), -(za % Eye), 1
+			);
+		}
+
 		public Mat4(
 				double i_00, double i_01, double i_02, double i_03, 
 				double i_10, double i_11, double i_12, double i_13, 

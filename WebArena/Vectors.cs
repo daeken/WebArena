@@ -1,4 +1,5 @@
 ﻿using System;
+using Bridge;
 
 namespace WebArena {
 	public struct Vec2 {
@@ -12,6 +13,8 @@ namespace WebArena {
 				return new Vec2(X / len, Y / len);
 			}
 		}
+		
+		public double[] ToArray() => new[] { X, Y };
 		public Vec2 Abs => new Vec2(Math.Abs(X), Math.Abs(Y));
 		public Vec2 Exp => new Vec2(Math.Exp(X), Math.Exp(Y));
 		public Vec2 Log => new Vec2(Math.Log(X), Math.Log(Y));
@@ -70,6 +73,10 @@ namespace WebArena {
 			return left.Dot(right);
 		}
 
+		public static Vec2 operator -(Vec2 v) {
+			return new Vec2(-v.X, -v.Y);
+		}
+
 		public double Dot(Vec2 right) {
 			var temp = this * right;
 			return temp.X + temp.Y;
@@ -91,12 +98,44 @@ namespace WebArena {
 				return new Vec3(X / len, Y / len, Z / len);
 			}
 		}
+
+		public double[] ToArray() => new[] { X, Y, Z };
 		public Vec3 Abs => new Vec3(Math.Abs(X), Math.Abs(Y), Math.Abs(Z));
 		public Vec3 Exp => new Vec3(Math.Exp(X), Math.Exp(Y), Math.Exp(Z));
 		public Vec3 Log => new Vec3(Math.Log(X), Math.Log(Y), Math.Log(Z));
 		public Vec3 Log2 => new Vec3(Math.Log(X, 2), Math.Log(Y, 2), Math.Log(Z, 2));
 		public Vec3 Sqrt => new Vec3(Math.Sqrt(X), Math.Sqrt(Y), Math.Sqrt(Z));
 		public Vec3 InverseSqrt => new Vec3(1 / Math.Sqrt(X), 1 / Math.Sqrt(Y), 1 / Math.Sqrt(Z));
+
+		public Vec3 XXX => new Vec3(X, X, X);
+		public Vec3 XXY => new Vec3(X, X, Y);
+		public Vec3 XXZ => new Vec3(X, X, Z);
+		public Vec3 XYX => new Vec3(X, Y, X);
+		public Vec3 XYY => new Vec3(X, Y, Y);
+		public Vec3 XYZ => this;
+		public Vec3 XZX => new Vec3(X, Z, X);
+		public Vec3 XZY => new Vec3(X, Z, Y);
+		public Vec3 XZZ => new Vec3(X, Z, Z);
+
+		public Vec3 YXX => new Vec3(Y, X, X);
+		public Vec3 YXY => new Vec3(Y, X, Y);
+		public Vec3 YXZ => new Vec3(Y, X, Z);
+		public Vec3 YYX => new Vec3(Y, Y, X);
+		public Vec3 YYY => new Vec3(Y, Y, Y);
+		public Vec3 YYZ => new Vec3(Y, Y, Z);
+		public Vec3 YZX => new Vec3(Y, Z, X);
+		public Vec3 YZY => new Vec3(Y, Z, Y);
+		public Vec3 YZZ => new Vec3(Y, Z, Z);
+
+		public Vec3 ZXX => new Vec3(Z, X, X);
+		public Vec3 ZXY => new Vec3(Z, X, Y);
+		public Vec3 ZXZ => new Vec3(Z, X, Z);
+		public Vec3 ZYX => new Vec3(Z, Y, X);
+		public Vec3 ZYY => new Vec3(Z, Y, Y);
+		public Vec3 ZYZ => new Vec3(Z, Y, Z);
+		public Vec3 ZZX => new Vec3(Z, Z, X);
+		public Vec3 ZZY => new Vec3(Z, Z, Y);
+		public Vec3 ZZZ => new Vec3(Z, Z, Z);
 
 		public Vec3(double v) {
 			X = Y = Z = v;
@@ -156,6 +195,10 @@ namespace WebArena {
 			return left.Cross(right);
 		}
 
+		public static Vec3 operator -(Vec3 v) {
+			return new Vec3(-v.X, -v.Y, -v.Z);
+		}
+
 		public double Dot(Vec3 right) {
 			var temp = this * right;
 			return temp.X + temp.Y + temp.Z;
@@ -181,6 +224,8 @@ namespace WebArena {
 				return new Vec4(X / len, Y / len, Z / len, W / len);
 			}
 		}
+		
+		public double[] ToArray() => new[] { X, Y, Z, W };
 		public Vec4 Abs => new Vec4(Math.Abs(X), Math.Abs(Y), Math.Abs(Z), Math.Abs(W));
 		public Vec4 Exp => new Vec4(Math.Exp(X), Math.Exp(Y), Math.Exp(Z), Math.Exp(W));
 		public Vec4 Log => new Vec4(Math.Log(X), Math.Log(Y), Math.Log(Z), Math.Log(W));
@@ -243,6 +288,10 @@ namespace WebArena {
 
 		public static double operator %(Vec4 left, Vec4 right) {
 			return left.Dot(right);
+		}
+
+		public static Vec4 operator -(Vec4 v) {
+			return new Vec4(-v.X, -v.Y, -v.Z, -v.W);
 		}
 
 		public double Dot(Vec4 right) {

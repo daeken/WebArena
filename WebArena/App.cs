@@ -48,7 +48,7 @@ namespace WebArena {
 
 			Scene = new SceneGraph();
 			Draw = new Draw();
-			PlayerCamera = new Camera(vec3(0, 75, -100));
+			PlayerCamera = new Camera(vec3(0, -100, 75));
 			//PlayerCamera.Yaw = Math.PI;
 			
 			var _ = LoadAssets();
@@ -66,7 +66,7 @@ namespace WebArena {
 
 		async Task LoadAssets() {
 			try {
-				var map = CurrentMap = new Bsp(await AssetManager.Get<BspData>("q3tourney2.json"));
+				var map = CurrentMap = new Bsp(await AssetManager.Get<BspData>("q3dm17.json"));
 				Scene.Add(map);
 				var sarge = new PlayerModel(await AssetManager.Get<Md3Data>("head.json"), await AssetManager.Get<Md3Data>("upper.json"),
 					await AssetManager.Get<Md3Data>("lower.json")) {Position = vec3(100.0, 24.0, 100)};
@@ -93,28 +93,28 @@ namespace WebArena {
 				const int movemod = 250;
 				switch(p.Key) {
 					case 87: // W
-						PlayerCamera.Move(vec3(0, 0, elapsed * -movemod));
-						break;
-					case 83: // S
-						PlayerCamera.Move(vec3(0, 0, elapsed * movemod));
-						break;
-					case 65: // A
-						PlayerCamera.Move(vec3(elapsed * -movemod, 0, 0));
-						break;
-					case 68: // D
-						PlayerCamera.Move(vec3(elapsed * movemod, 0, 0));
-						break;
-					case 32: // Space
-						PlayerCamera.Move(vec3(0, elapsed * movemod, 0));
-						break;
-					case 16: // Shift
 						PlayerCamera.Move(vec3(0, elapsed * -movemod, 0));
 						break;
+					case 83: // S
+						PlayerCamera.Move(vec3(0, elapsed * movemod, 0));
+						break;
+					case 65: // A
+						PlayerCamera.Move(vec3(elapsed * movemod, 0, 0));
+						break;
+					case 68: // D
+						PlayerCamera.Move(vec3(elapsed * -movemod, 0, 0));
+						break;
+					case 32: // Space
+						PlayerCamera.Move(vec3(0, 0, elapsed * movemod));
+						break;
+					case 16: // Shift
+						PlayerCamera.Move(vec3(0, 0, elapsed * -movemod));
+						break;
 					case 38: // Up
-						PlayerCamera.Look(elapsed, 0);
+						PlayerCamera.Look(-elapsed, 0);
 						break;
 					case 40: // Down
-						PlayerCamera.Look(-elapsed, 0);
+						PlayerCamera.Look(elapsed, 0);
 						break;
 					case 37: // Left
 						PlayerCamera.Look(0, elapsed * 2);

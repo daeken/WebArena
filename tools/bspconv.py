@@ -105,6 +105,11 @@ def Face():
 def Lightmap():
 	pixels = uint8[128*128*3]
 
+rotmat = np.array([
+	[1.0000000,  0.0000000,  0.0000000], 
+	[0.0000000,  0.0000000, -1.0000000], 
+	[0.0000000,  1.0000000,  0.0000000]])
+
 # ind, verts = tesselate(face.size, fv, fmv)
 # this function is directly adapted from http://media.tojicode.com/q3bsp/js/q3bsp_worker.js
 def tesselate(size, verts, meshverts):
@@ -171,10 +176,19 @@ def tesselate(size, verts, meshverts):
 
 	return meshverts, verts
 
-def rewind(data, xmod=-1):
+def rewind(data, xmod=1):
+	return data
 	out = []
 	for i in xrange(0, len(data), 3):
 		out += [xmod * data[i+0], data[i+2], data[i+1]]
+	return out
+
+def rotate(data):
+	return data
+	out = []
+	for i in xrange(0, len(data), 3):
+		vec = np.array(data[i:i+3])
+		out += list(rotmat.dot(vec))
 	return out
 
 def interleave(count, *elems):
@@ -273,8 +287,8 @@ def main(path, mapname):
 		if face.type == 1 or face.type == 3:
 			outindices[face.texture][face.lm_index] += rewind([mv + numverts for mv in fmv], 1)
 			for vert in fv:
-				outpositions += rewind(vert.position)
-				outnormals += rewind(vert.normal)
+				outpositions += rotate(vert.position)
+				outnormals += rotate(vert.normal)
 				outtexcoords += vert.texcoord
 				outlmcoords += vert.lmcoord
 			numverts += len(fv)
@@ -282,8 +296,8 @@ def main(path, mapname):
 			fmv, fv = tesselate(face.size, fv, fmv)
 			outindices[face.texture][face.lm_index] += rewind([mv + numverts for mv in fmv], 1)
 			for vert in fv:
-				outpositions += rewind(vert.position)
-				outnormals += rewind(vert.normal)
+				outpositions += rotate(vert.position)
+				outnormals += rotate(vert.normal)
 				outtexcoords += vert.texcoord
 				outlmcoords += vert.lmcoord
 			numverts += len(fv)
@@ -294,8 +308,9 @@ def main(path, mapname):
 
 	outplanes = []
 	for plane in planes:
-		outplanes.append(dict(Normal=rewind(plane.normal), Distance=plane.dist))
+		outplanes.append(dict(Normal=rotate(plane.normal), Distance=plane.dist))
 	outbrushes = []
+	print len(brushes), model.brush, model.n_brushes
 	for brush in brushes[model.brush:model.brush+model.n_brushes]:
 		texture = textures[brush.texture]
 		# XXX: Rewrite file so non-solid brushes are nuked.
@@ -304,12 +319,17 @@ def main(path, mapname):
 		outbrushes.append(dict(Collidable=collidable, Planes=[side.plane for side in sides]))
 
 	def btree(ind):
+		def reminmax(mins, maxs):
+			mins, maxs = rotate(mins), rotate(maxs)
+			return [min(mins[0], maxs[0]), min(mins[1], maxs[1]), min(mins[2], maxs[2])], [max(mins[0], maxs[0]), max(mins[1], maxs[1]), max(mins[2], maxs[2])]
 		if ind >= 0:
 			node = nodes[ind]
-			return dict(Leaf=False, Plane=node.plane, Mins=rewind(node.mins), Maxs=rewind(node.maxs), Left=btree(node.children[0]), Right=btree(node.children[1]))
+			mins, maxs = reminmax(node.mins, node.maxs)
+			return dict(Leaf=False, Plane=node.plane, Mins=mins, Maxs=maxs, Left=btree(node.children[0]), Right=btree(node.children[1]))
 		else:
 			leaf = leafs[-(ind + 1)]
-			return dict(Leaf=True, Plane=-1, Mins=rewind(leaf.mins), Maxs=rewind(leaf.maxs), Brushes=[x.brush for x in leafbrushes[leaf.leafbrush:leaf.leafbrush+leaf.n_leafbrushes]])
+			mins, maxs = reminmax(leaf.mins, leaf.maxs)
+			return dict(Leaf=True, Plane=-1, Mins=mins, Maxs=maxs, Brushes=[x.brush for x in leafbrushes[leaf.leafbrush:leaf.leafbrush+leaf.n_leafbrushes]])
 
 	outvertices = interleave(len(outpositions) / 3, outpositions, outnormals, outtexcoords, outlmcoords)
 

@@ -1,4 +1,6 @@
-﻿using static System.Math;
+﻿using System;
+using System.Collections.Generic;
+using static System.Math;
 
 namespace WebArena {
 	static partial class Globals {
@@ -21,10 +23,9 @@ namespace WebArena {
 		public static Vec4 vec4(double x, double y, double z, double w) => new Vec4(x, y, z, w);
 
 		public static double Clamp(double x, double min, double max) => Min(Max(x, min), max);
-		public static double Fract(double x) => x - Floor(x);
+		public static double Fract(double x) => x - Math.Floor(x);
 
-		public static double Floor(double x) => (int) x;
-		public static Vec3 Floor(Vec3 x) => vec3((int) x.X, (int) x.Y, (int) x.Z);
+		public static Vec3 Floor(Vec3 x) => vec3(Math.Floor(x.X), Math.Floor(x.Y), Math.Floor(x.Z));
 
 		public static double Lerp(double a, double b, double x) => (b - a) * x + a;
 		public static Vec3 Lerp(Vec3 a, Vec3 b, double x) => (b - a) * x + a;
@@ -45,6 +46,25 @@ namespace WebArena {
 			var theta = Acos(dot) * x;
 			var c = (b - a * dot).Normalized;
 			return a * Cos(theta) + c * Sin(theta);
+		}
+
+		public static bool RayPlaneIntersection(Vec3 origin, Vec3 dir, Vec3 normal, double distance, out double t, out double vd) {
+			t = 0;
+			vd = normal.X * dir.X + normal.Y * dir.Y + normal.Z * dir.Z;
+			if(vd == 0)
+				return false;
+			t = -(normal.X * origin.X + normal.Y * origin.Y + normal.Z * origin.Z + distance) / vd;
+			return true;
+		}
+
+		public static void SortPoints(List<Vec3> points, Vec3 normal) {
+			if(points.Count < 3)
+				return;
+			var first = points[0];
+			points.Sort((a, b) => {
+				var v = (a - first) ^ (b - first);
+				return v % normal < 0 ? 1 : 0;
+			});
 		}
 	}
 }
