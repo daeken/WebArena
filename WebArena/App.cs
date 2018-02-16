@@ -48,7 +48,7 @@ namespace WebArena {
 
 			Scene = new SceneGraph();
 			Draw = new Draw();
-			PlayerCamera = new Camera(vec3(0, -100, 75));
+			PlayerCamera = new Camera(vec3(-400, 1000, 750));
 			//PlayerCamera.Yaw = Math.PI;
 			
 			var _ = LoadAssets();
@@ -85,6 +85,7 @@ namespace WebArena {
 			Document.Title = $"WebArena | FPS: {Math.Round(1 / (RenderTimes.Sum() / 120))}";
 			LastTime = Time;
 
+			var movement = vec3();
 			foreach(var p in KeyState) {
 				var elapsed = Time - p.Value;
 				if(elapsed < 0)
@@ -93,23 +94,23 @@ namespace WebArena {
 				const int movemod = 250;
 				switch(p.Key) {
 					case 87: // W
-						PlayerCamera.Move(vec3(0, elapsed * -movemod, 0));
+						movement += vec3(0, elapsed * -movemod, 0);
 						break;
 					case 83: // S
-						PlayerCamera.Move(vec3(0, elapsed * movemod, 0));
+						movement += vec3(0, elapsed * movemod, 0);
 						break;
 					case 65: // A
-						PlayerCamera.Move(vec3(elapsed * movemod, 0, 0));
+						movement += vec3(elapsed * movemod, 0, 0);
 						break;
 					case 68: // D
-						PlayerCamera.Move(vec3(elapsed * -movemod, 0, 0));
+						movement += vec3(elapsed * -movemod, 0, 0);
 						break;
-					case 32: // Space
-						PlayerCamera.Move(vec3(0, 0, elapsed * movemod));
+					/*case 32: // Space
+						PlayerCamera.Move(vec3(0, 0, elapsed * movemod), rtime);
 						break;
 					case 16: // Shift
-						PlayerCamera.Move(vec3(0, 0, elapsed * -movemod));
-						break;
+						PlayerCamera.Move(vec3(0, 0, elapsed * -movemod), rtime);
+						break;*/
 					case 38: // Up
 						PlayerCamera.Look(-elapsed, 0);
 						break;
@@ -124,6 +125,8 @@ namespace WebArena {
 						break;
 				}
 			}
+			
+			PlayerCamera.Move(movement, rtime);
 
 			PlayerCamera.Update();
 			Scene.Update();

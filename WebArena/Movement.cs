@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using static System.Console;
 using static WebArena.Globals;
 
 namespace WebArena {
-	struct Trace {
+	class Trace {
 		public bool AllSolid, StartSolid;
 		public double Fraction;
 		public Vec3 End;
@@ -38,14 +39,13 @@ namespace WebArena {
 		Vec3 Velocity;
 		bool OnGround;
 		double FrameTime;
+
+		Trace GroundTrace;
 		
 		public void Move(Vec3 dir, double frameTime) {
 			FrameTime = frameTime * 0.0075;
 
 			OnGround = GroundCheck();
-			
-			if(OnGround)
-				WriteLine($"On ground at {Floor(Position)}");
 
 			if(OnGround)
 				WalkMove(dir.Normalized);
@@ -54,18 +54,184 @@ namespace WebArena {
 		}
 
 		void WalkMove(Vec3 dir) {
+			ApplyFriction();
+
+			var speed = dir.Length * Q3Scale;
+			
+			Accelerate(dir, speed, Q3Accelerate);
+
+			Velocity = ClipVelocity(Velocity, GroundTrace.Plane.Normal);
+
+			if(Velocity.X == 0 && Velocity.Y == 0) return;
+			
+			StepSlideMove(false);
+		}
+
+		void ApplyFriction() {
+			if(!OnGround) return;
+
+			var speed = Velocity.Length;
+			var drop = Math.Max(Q3StopSpeed, speed);
+			var newSpeed = Math.Max(0, speed - drop);
+			if(speed != 0)
+				Velocity *= newSpeed / speed;
+			else
+				Velocity = vec3();
 		}
 
 		void AirMove(Vec3 dir) {
+			var speed = dir.Length * Q3Scale;
+			Accelerate(dir, speed, Q3AirAccelerate);
+
+			StepSlideMove(true);
+		}
+
+		void Accelerate(Vec3 dir, double speed, double accel) {
+			var curspeed = Velocity % dir;
+			var add = speed - curspeed;
+			if(add > 0)
+				Velocity += dir * Math.Min(accel * FrameTime * speed, add);
+		}
+
+		void StepSlideMove(bool gravity) {
+			var startO = Position;
+			var startV = Velocity;
+
+			if(!SlideMove(gravity))
+				return;
+
+			var down = startO;
+			down.Z -= Q3StepSize;
+			var trace = Trace(startO, down, Q3PlayerRadius);
+
+			var up = vec3(0, 0, 1);
+
+			if(Velocity.Z > 0 && (trace.Fraction == 1 || trace.Plane.Normal % up < 0.7)) return;
+
+			var downO = Position;
+			var downV = Velocity;
+
+			up = startO;
+			up.Z += Q3StepSize;
+
+			trace = Trace(startO, up, Q3PlayerRadius);
+			if(trace.AllSolid) return;
+
+			var stepSize = trace.End.Z - startO.Z;
+			Position = trace.End;
+			Velocity = startV;
+
+			SlideMove(gravity);
+
+			down = Position;
+			down.Z -= stepSize;
+			trace = Trace(Position, down, Q3PlayerRadius);
+			if(!trace.AllSolid)
+				Position = trace.End;
+			if(trace.Fraction < 1)
+				Velocity = ClipVelocity(Velocity, trace.Plane.Normal);
+		}
+
+		bool SlideMove(bool gravity) {
+			var endVelocity = vec3();
+			var planes = new List<Vec3>();
+			
+			if(gravity) {
+				endVelocity = Velocity;
+				endVelocity.Z -= Q3Gravity * FrameTime;
+				Velocity.Z = (Velocity.Z + endVelocity.Z) / 2;
+				if(GroundTrace != null && GroundTrace.Plane != null)
+					Velocity = ClipVelocity(Velocity, GroundTrace.Plane.Normal);
+			}
+			
+			if(GroundTrace?.Plane != null)
+				planes.Add(GroundTrace.Plane.Normal);
+			
+			planes.Add(Velocity.Normalized);
+
+			var timeLeft = FrameTime;
+			int bumpCount;
+			for(bumpCount = 0; bumpCount < 4; ++bumpCount) {
+				var end = Position + Velocity * timeLeft;
+				
+				var trace = Trace(Position, end, Q3PlayerRadius);
+
+				if(trace.AllSolid) {
+					Velocity.Z = 0;
+					return true;
+				}
+
+				if(trace.Fraction > 0)
+					Position = trace.End;
+				
+				if(trace.Fraction == 1)
+					break;
+
+				timeLeft -= timeLeft * trace.Fraction;
+				
+				planes.Add(trace.Plane.Normal);
+
+				for(var i = 0; i < planes.Count; ++i) {
+					var plane = planes[i];
+					if(Velocity % plane >= 0.1) continue;
+
+					var cvel = ClipVelocity(Velocity, plane);
+					var ecvel = ClipVelocity(endVelocity, plane);
+
+					for(var j = 0; j < planes.Count; ++j) {
+						if(i == j) continue;
+						var splane = planes[j];
+						if(cvel % splane >= 0.1) continue;
+
+						cvel = ClipVelocity(cvel, splane);
+						ecvel = ClipVelocity(ecvel, splane);
+
+						if(cvel % plane >= 0) continue;
+
+						var dir = (plane ^ splane).Normalized;
+						cvel = dir * (dir % Velocity);
+						ecvel = dir * (dir % endVelocity);
+
+						for(var k = 0; k < planes.Count; ++k) {
+							if(i == k || j == k) continue;
+							var tplane = planes[k];
+							if(cvel % tplane >= 0.1) continue;
+
+							Velocity = vec3();
+							return true;
+						}
+					}
+
+					Velocity = cvel;
+					endVelocity = ecvel;
+					break;
+				}
+			}
+
+			if(gravity)
+				Velocity = endVelocity;
+
+			return bumpCount != 0;
+		}
+
+		Vec3 ClipVelocity(Vec3 vel, Vec3 normal) {
+			var backoff = vel % normal;
+
+			if(backoff < 0)
+				backoff *= Q3Overclip;
+			else
+				backoff /= Q3Overclip;
+
+			return vel - normal * backoff;
 		}
 
 		bool GroundCheck() {
 			var checkPoint = Position - vec3(0, 0, Q3PlayerRadius + 0.25);
-			var groundTrace = Trace(Position, checkPoint, Q3PlayerRadius);
-			if(groundTrace.Fraction == 1 || groundTrace.Plane == null || (Velocity.Z > 0 && Velocity % groundTrace.Plane.Normal > 10))
+			GroundTrace = Trace(Position, checkPoint, Q3PlayerRadius);
+			if(GroundTrace.Fraction == 1 || GroundTrace.Plane == null || (Velocity.Z > 0 && Velocity % GroundTrace.Plane.Normal > 10))
 				return false;
 
-			return groundTrace.Plane.Normal.Z >= 0.7;
+			return GroundTrace.Plane.Normal.Z >= 0.7;
 		}
 
 		Trace Trace(Vec3 start, Vec3 end, double radius = 0) {
