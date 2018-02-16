@@ -62,8 +62,6 @@ namespace WebArena {
 		bool GroundCheck() {
 			var checkPoint = Position - vec3(0, 0, Q3PlayerRadius + 0.25);
 			var groundTrace = Trace(Position, checkPoint, Q3PlayerRadius);
-			if(groundTrace.Plane != null)
-				WriteLine($"Foo {groundTrace.Plane.Normal}");
 			if(groundTrace.Fraction == 1 || groundTrace.Plane == null || (Velocity.Z > 0 && Velocity % groundTrace.Plane.Normal > 10))
 				return false;
 
@@ -97,9 +95,9 @@ namespace WebArena {
 			var endDist = plane.Normal % end - plane.Distance;
 
 			if(startDist >= radius && endDist >= radius)
-				TraceNode(startFraction, endFraction, end, start, radius, node.Left, ref trace);
+				TraceNode(startFraction, endFraction, start, end, radius, node.Left, ref trace);
 			else if(startDist < -radius && endDist < -radius)
-				TraceNode(startFraction, endFraction, end, start, radius, node.Right, ref trace);
+				TraceNode(startFraction, endFraction, start, end, radius, node.Right, ref trace);
 			else {
 				var back = startDist < endDist;
 				double fraction1 = 1, fraction2 = 0;
@@ -144,6 +142,9 @@ namespace WebArena {
 			var startsOut = false;
 			var endsOut = false;
 			BspCollisionPlane collisionPlane = null;
+
+			if(brush.Planes.Length == 0)
+				return;
 			
 			foreach(var plane in brush.Planes) {
 				var startDist = start % plane.Normal - (plane.Distance + radius);
