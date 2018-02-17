@@ -32,7 +32,8 @@ namespace WebArena {
 
 		public void Update() {
 			var at = (Mat3.Yaw(Yaw) * Mat3.Roll(Pitch) * vec3(0, 1, 0)).Normalized;
-			Matrix = Mat4.LookAt(Position, Position + at, vec3(0, 0, 1));
+			var poff = Position + vec3(0, 0, 60);
+			Matrix = Mat4.LookAt(poff, poff + at, vec3(0, 0, 1));
 		}
 	}
 }

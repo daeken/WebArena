@@ -1,5 +1,5 @@
 from Struct import *
-import copy, json, sys
+import copy, json, pprint, sys
 import numpy as np
 from assets import AssetManager
 
@@ -238,6 +238,57 @@ def adjustBrightness(pixels):
 def flip(pixels, stride):
 	return reduce(lambda a, x: a + x, [pixels[i - stride:i] for i in xrange(len(pixels), 0, -stride)])
 
+def parseEntities(data):
+	data = data.split('\0', 1)[0].strip()
+
+	entities = []
+	name = None
+	while True:
+		data = data.lstrip()
+		if len(data) == 0:
+			break
+		elif data[0] == '{':
+			data = data[1:]
+			entities.append({})
+		elif data[0] == '"':
+			s = ''
+			i = 1
+			while True:
+				if data[i] == '\\':
+					i += 1
+					if data[i] == 'n':
+						s += '\n'
+					elif data[i] == 'r':
+						s += '\r'
+					elif data[i] == 't':
+						s += '\t'
+					elif data[i] == '0':
+						s += '\0'
+					elif data[i] == '\\':
+						s += '\\'
+					elif data[i] == '"':
+						s += '"'
+					elif data[i] == 'x':
+						s += chr(int(data[i+1:i+3]))
+						i += 2
+					i += 1
+				elif data[i] == '"':
+					i += 1
+					break
+				else:
+					s += data[i]
+					i += 1
+			data = data[i:]
+			if name is None:
+				name = s
+			else:
+				entities[-1][name] = s
+				name = None
+		elif data[0] == '}':
+			data = data[1:]
+
+	pprint.pprint(entities)
+
 def main(path, mapname):
 	global am
 	am = AssetManager(path)
@@ -253,6 +304,9 @@ def main(path, mapname):
 
 	fp.seek(header.direntries[0].offset)
 	entities = fp.read(header.direntries[0].length)
+
+	entities = parseEntities(entities)
+	return
 	
 	textures = decode(1, Texture)
 	planes = decode(2, Plane)
@@ -310,8 +364,7 @@ def main(path, mapname):
 	for plane in planes:
 		outplanes.append(dict(Normal=rotate(plane.normal), Distance=plane.dist))
 	outbrushes = []
-	print len(brushes), model.brush, model.n_brushes
-	for brush in brushes[model.brush:model.brush+model.n_brushes]:
+	for brush in brushes:
 		texture = textures[brush.texture]
 		# XXX: Rewrite file so non-solid brushes are nuked.
 		collidable = (texture.content_flags & 1) == 1

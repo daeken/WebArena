@@ -1,5 +1,4 @@
 ﻿using System;
-using Bridge;
 
 namespace WebArena {
 	public struct Vec2 {

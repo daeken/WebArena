@@ -48,7 +48,7 @@ namespace WebArena {
 
 			Scene = new SceneGraph();
 			Draw = new Draw();
-			PlayerCamera = new Camera(vec3(-400, 1000, 750));
+			PlayerCamera = new Camera(/*vec3(-400, 1000, 750)*/ vec3(0, -100, 75));
 			//PlayerCamera.Yaw = Math.PI;
 			
 			var _ = LoadAssets();
@@ -66,7 +66,7 @@ namespace WebArena {
 
 		async Task LoadAssets() {
 			try {
-				var map = CurrentMap = new Bsp(await AssetManager.Get<BspData>("q3dm17.json"));
+				var map = CurrentMap = new Bsp(await AssetManager.Get<BspData>("q3tourney2.json"));
 				Scene.Add(map);
 				var sarge = new PlayerModel(await AssetManager.Get<Md3Data>("head.json"), await AssetManager.Get<Md3Data>("upper.json"),
 					await AssetManager.Get<Md3Data>("lower.json")) {Position = vec3(100.0, 24.0, 100)};
