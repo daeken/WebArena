@@ -40,6 +40,7 @@ namespace WebArena {
 		public int[] Brushes { get; set; }
 	}
 	class BspData {
+		public List<Dictionary<string, string>> Entities { get; set; }
 		public Dictionary<int, BspMaterialStage[]> Materials { get; set; }
 		public BspMesh[] Meshes { get; set; }
 		public Dictionary<int, byte[]> Lightmaps { get; set; }
@@ -67,8 +68,21 @@ namespace WebArena {
 	}
 	class Bsp : Model {
 		public readonly BspCollisionTree CollisionTree;
+		readonly List<Dictionary<string, string>> Entities;
+		public readonly List<Vec3> SpawnPoints;
+
+		List<Dictionary<string, string>> GetEntities(string cls) {
+			var list = new List<Dictionary<string, string>>();
+			foreach(var ent in Entities)
+				if(ent["classname"] == cls)
+					list.Add(ent);
+			return list;
+		}
 		
 		public Bsp(BspData data) {
+			Entities = data.Entities;
+			SpawnPoints = GetEntities("info_player_deathmatch").Select(x => new Vec3(x["origin"].Split(' ').Select(y => double.Parse(y)).ToArray())).ToList();
+			
 			var materials = new Dictionary<int, Material[]>();
 			var lightmaps = new Dictionary<int, Texture>();
 			foreach(var pair in data.Materials) {

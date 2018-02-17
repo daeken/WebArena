@@ -6,6 +6,7 @@ using static System.Console;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using MoreLinq;
 using Newtonsoft.Json;
 
@@ -131,6 +132,7 @@ namespace Converter {
 		}
 
 		class JbspFile {
+			public List<Dictionary<string, string>> Entities;
 			public Dictionary<int, JbspMaterial> Materials;
 			public JbspMesh[] Meshes;
 			public JbspPlane[] Planes;
@@ -275,6 +277,63 @@ namespace Converter {
 			return (meshverts, verts);
 		}
 
+		static IEnumerable<Dictionary<string, string>> ParseEntities(string data) {
+			data = data.Trim();
+			Dictionary<string, string> cur = null;
+			string name = null;
+			while(true) {
+				data = data.TrimStart();
+				if(data.Length == 0)
+					break;
+				if(data[0] == '{') {
+					data = data.Substring(1);
+					cur = new Dictionary<string, string>();
+				}  else if(data[0] == '"') {
+					var s = "";
+					var i = 1;
+					while(true) {
+						if(data[i] == '\\') {
+							switch(data[++i]) {
+								case 'n':
+									s += "\n";
+									break;
+								case 'r':
+									s += "\r";
+									break;
+								case 't':
+									s += "\t";
+									break;
+								case '0':
+									s += "\0";
+									break;
+								case '\\':
+									s += "\\";
+									break;
+								case '"':
+									s += "\"";
+									break;
+							}
+							i++;
+						} else if(data[i] == '"') {
+							i++;
+							break;
+						} else
+							s += data[i++];
+					}
+					data = data.Substring(i);
+					if(name == null)
+						name = s;
+					else {
+						cur[name] = s;
+						name = null;
+					}
+				} else if(data[0] == '}') {
+					data = data.Substring(1);
+					yield return cur;
+				}
+			}
+		}
+
 		public static void Convert(byte[] istream, Stream ostream) {
 			var materials = JsonConvert.DeserializeObject<Dictionary<string, JbspMaterial>>(File.ReadAllText("materials.json"));
 			
@@ -283,7 +342,7 @@ namespace Converter {
 			Debug.Assert(header.Magic == 0x50534249);
 
 			T[] GetLump<T>(int lump) => bread.ReadMaxStructs<T>(header.DirEntries[lump].Length, header.DirEntries[lump].Offset);
-			
+
 			var textures = GetLump<BspTexture>(1);
 			var planes = GetLump<BspPlane>(2);
 			var nodes = GetLump<BspNode>(3);
@@ -299,6 +358,9 @@ namespace Converter {
 			var faces = GetLump<BspFace>(13);
 			var lightmaps = GetLump<BspLightmap>(14);
 
+			bread.Seek(header.DirEntries[0].Offset);
+			var entities = ParseEntities(Encoding.ASCII.GetString(bread.ReadBytes(header.DirEntries[0].Length - 1)));
+			
 			var outindices = new Dictionary<int, Dictionary<int, List<int>>>();
 			var outvertices = new List<PVertex>();
 
@@ -398,6 +460,7 @@ namespace Converter {
 			}
 			
 			var output = new JbspFile {
+				Entities = entities.ToList(), 
 				Materials = outmaterials, 
 				Meshes = outmeshes.ToArray(), 
 				Planes = planes.Select(plane => new JbspPlane { Normal=plane.Normal.ToArray, Distance=plane.Distance }).ToArray(), 
