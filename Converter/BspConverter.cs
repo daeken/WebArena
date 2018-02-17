@@ -1,10 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Runtime.InteropServices;
 using static System.Console;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using MoreLinq;
 using Newtonsoft.Json;
+
+using JbspMaterial = System.Collections.Generic.List<Converter.BspConverter.MaterialPass>;
 
 namespace Converter {
 	public class BspConverter {
@@ -126,7 +131,7 @@ namespace Converter {
 		}
 
 		class JbspFile {
-			public JbspMaterial[] Materials;
+			public Dictionary<int, JbspMaterial> Materials;
 			public JbspMesh[] Meshes;
 			public JbspPlane[] Planes;
 			public JbspBrush[] Brushes;
@@ -134,14 +139,14 @@ namespace Converter {
 			public int[][] Lightmaps;
 		}
 
-		class JbspMaterial {
-		}
-
 		class JbspMesh {
+			public int MaterialIndex, LightmapIndex;
+			public int[] Indices;
+			public float[] Vertices;
 		}
 
 		class JbspPlane {
-			public Vec3 Normal;
+			public float[] Normal;
 			public float Distance;
 		}
 
@@ -158,6 +163,19 @@ namespace Converter {
 			public int[] Brushes;
 		}
 
+		struct PVertex {
+			public Vec3 Position, Normal;
+			public Vec2 TexCoord, LmCoord;
+		}
+		
+		public class MaterialPass {
+			public bool Clamp;
+			public string FragShader;
+			public string Texture;
+			public List<string> AnimTex;
+			public int[] Blend;
+		}
+		
 		int[] AdjustBrightness(byte[] ipixels) {
 			var rpixels = new int[ipixels.Length];
 			for(var i = 0; i < ipixels.Length; i += 3) {
@@ -171,9 +189,38 @@ namespace Converter {
 				rpixels[i + 2] = (int) (b * scale);
 			}
 			return rpixels;
-		} 
+		}
+
+		(List<int>, List<PVertex>) SplitMesh(List<int> indices, List<PVertex> vertices) {
+			var indmap = new Dictionary<int, int>();
+			var outindices = new List<int>();
+			var outvertices = new List<PVertex>();
+
+			foreach(var ind in indices) {
+				if(indmap.ContainsKey(ind))
+					outindices.Add(indmap[ind]);
+				else {
+					var i = indmap.Count;
+					outvertices.Add(vertices[ind]);
+					indmap[ind] = i;
+					outindices.Add(i);
+				}
+			}
+			
+			return (outindices, outvertices);
+		}
+
+		JbspMaterial CopyMaterial(JbspMaterial material) => material.Select(pass => new MaterialPass {
+			Clamp = pass.Clamp, 
+			FragShader = pass.FragShader, 
+			Texture = pass.Texture, 
+			AnimTex = pass.AnimTex?.Select(x => x).ToList(), 
+			Blend = pass.Blend?.Select(x => x).ToArray()
+		}).ToList();
 
 		public BspConverter(string fn) {
+			var materials = JsonConvert.DeserializeObject<Dictionary<string, JbspMaterial>>(File.ReadAllText("materials.json"));
+			
 			var bread = new BinaryFileReader(fn);
 			var header = bread.ReadStruct<BspHeader>();
 			Debug.Assert(header.Magic == 0x50534249);
@@ -195,9 +242,33 @@ namespace Converter {
 			var faces = GetLump<BspFace>(13);
 			var lightmaps = GetLump<BspLightmap>(14);
 
-			foreach(var model in models) {
-				foreach(var face in faces.Slice(model.Face, model.FaceCount)) {
-					
+			var outindices = new Dictionary<int, Dictionary<int, List<int>>>();
+			var outvertices = new List<PVertex>();
+
+			var model = models[0];
+			foreach(var face in faces.Slice(model.Face, model.FaceCount)) {
+				if(!outindices.ContainsKey(face.Texture))
+					outindices[face.Texture] = new Dictionary<int, List<int>>();
+				if(!outindices[face.Texture].ContainsKey(face.LmIndex))
+					outindices[face.Texture][face.LmIndex] = new List<int>();
+				var fmv = meshverts.Slice(face.MeshVert, face.MeshVertCount).Select(mv => mv.Offset);
+				var fv = vertices.Slice(face.Vertex, face.VertexCount).ToList();
+				var ci = outindices[face.Texture][face.LmIndex];
+				switch(face.Type) {
+					case 1: case 3:
+						outindices[face.Texture][face.LmIndex] = ci.Concat(fmv.Select(mv => mv + outvertices.Count)).ToList();
+						foreach(var vert in fv)
+							outvertices.Add(new PVertex {
+								Position = vert.Position, 
+								Normal = vert.Normal, 
+								TexCoord = vert.TexCoord, 
+								LmCoord = vert.LmCoord
+							});
+						break;
+					case 2:
+						break;
+					case 4: // Billboards
+						break;
 				}
 			}
 
@@ -226,9 +297,38 @@ namespace Converter {
 					};
 				}
 			}
+
+			var outmaterials = new Dictionary<int, JbspMaterial>();
+			var outmeshes = new List<JbspMesh>();
+
+			foreach(var mkey in outindices.Keys) {
+				var name = textures[mkey].Name;
+
+				JbspMaterial material;
+				if(materials.ContainsKey(name))
+					material = materials[name];
+				else {
+					material = CopyMaterial(materials["plaintexture"]);
+					material[0].Texture = name + ".jpg";
+				}
+
+				outmaterials[mkey] = material;
+
+				foreach(var (lmkey, indices) in outindices[mkey]) {
+					var (sind, svert) = SplitMesh(indices, outvertices);
+					outmeshes.Add(new JbspMesh {
+						MaterialIndex = mkey, 
+						LightmapIndex = lmkey, 
+						Indices = sind.ToArray(), 
+						Vertices = svert.SelectMany(vert => new [] { vert.Position.ToArray, vert.Normal.ToArray, vert.TexCoord.ToArray, vert.LmCoord.ToArray }).SelectMany(x => x).ToArray()
+					});
+				}
+			}
 			
 			var output = new JbspFile {
-				Planes = planes.Select(plane => new JbspPlane { Normal=plane.Normal, Distance=plane.Distance }).ToArray(), 
+				Materials = outmaterials, 
+				Meshes = outmeshes.ToArray(), 
+				Planes = planes.Select(plane => new JbspPlane { Normal=plane.Normal.ToArray, Distance=plane.Distance }).ToArray(), 
 				Brushes = brushes.Select(brush => new JbspBrush {
 					Collidable=(textures[brush.Texture].ContentFlags & 1) == 1, 
 					Planes=brushsides.Slice(brush.BrushSide, brush.BrushSideCount).Select(bs => bs.Plane).ToArray()
