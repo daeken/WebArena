@@ -2,6 +2,9 @@
 using System.Runtime.InteropServices;
 using static System.Console;
 using System.Diagnostics;
+using System.Linq;
+using MoreLinq;
+using Newtonsoft.Json;
 
 namespace Converter {
 	public class BspConverter {
@@ -122,6 +125,54 @@ namespace Converter {
 			public readonly byte[] Pixels;
 		}
 
+		class JbspFile {
+			public JbspMaterial[] Materials;
+			public JbspMesh[] Meshes;
+			public JbspPlane[] Planes;
+			public JbspBrush[] Brushes;
+			public JbspTree Tree;
+			public int[][] Lightmaps;
+		}
+
+		class JbspMaterial {
+		}
+
+		class JbspMesh {
+		}
+
+		class JbspPlane {
+			public Vec3 Normal;
+			public float Distance;
+		}
+
+		class JbspBrush {
+			public bool Collidable;
+			public int[] Planes;
+		}
+
+		class JbspTree {
+			public bool Leaf;
+			public int Plane;
+			public int[] Mins, Maxs;
+			public JbspTree Left, Right;
+			public int[] Brushes;
+		}
+
+		int[] AdjustBrightness(byte[] ipixels) {
+			var rpixels = new int[ipixels.Length];
+			for(var i = 0; i < ipixels.Length; i += 3) {
+				double r = ipixels[i + 0] * 4.0, g = ipixels[i + 1] * 4.0, b = ipixels[i + 2] * 4.0;
+				var scale = 1.0;
+				if(r > 255 && 255 / r < scale) scale = 255 / r;
+				if(g > 255 && 255 / g < scale) scale = 255 / g;
+				if(b > 255 && 255 / b < scale) scale = 255 / b;
+				rpixels[i + 0] = (int) (r * scale);
+				rpixels[i + 1] = (int) (g * scale);
+				rpixels[i + 2] = (int) (b * scale);
+			}
+			return rpixels;
+		} 
+
 		public BspConverter(string fn) {
 			var bread = new BinaryFileReader(fn);
 			var header = bread.ReadStruct<BspHeader>();
@@ -143,6 +194,50 @@ namespace Converter {
 			var effects = GetLump<BspEffect>(12);
 			var faces = GetLump<BspFace>(13);
 			var lightmaps = GetLump<BspLightmap>(14);
+
+			foreach(var model in models) {
+				foreach(var face in faces.Slice(model.Face, model.FaceCount)) {
+					
+				}
+			}
+
+			JbspTree convertTree(int ind) {
+				if(ind >= 0) {
+					var node = nodes[ind];
+					return new JbspTree {
+						Leaf = false, 
+						Plane = node.Plane, 
+						Mins = node.Mins, 
+						Maxs = node.Maxs, 
+						Left = convertTree(node.Children[0]), 
+						Right = convertTree(node.Children[1]),
+						Brushes = null
+					};
+				} else {
+					var leaf = leafs[-(ind + 1)];
+					return new JbspTree {
+						Leaf = true, 
+						Plane = -1, 
+						Mins = leaf.Mins, 
+						Maxs = leaf.Maxs, 
+						Brushes = leafbrushes.Slice(leaf.LeafBrush, leaf.LeafBrushCount).Select(lb => lb.Brush).ToArray(), 
+						Left = null, 
+						Right = null
+					};
+				}
+			}
+			
+			var output = new JbspFile {
+				Planes = planes.Select(plane => new JbspPlane { Normal=plane.Normal, Distance=plane.Distance }).ToArray(), 
+				Brushes = brushes.Select(brush => new JbspBrush {
+					Collidable=(textures[brush.Texture].ContentFlags & 1) == 1, 
+					Planes=brushsides.Slice(brush.BrushSide, brush.BrushSideCount).Select(bs => bs.Plane).ToArray()
+				}).ToArray(), 
+				Tree = convertTree(0), 
+				Lightmaps = lightmaps.Select(lm => AdjustBrightness(lm.Pixels)).ToArray()
+			};
+			
+			WriteLine(JsonConvert.SerializeObject(output));
 		}
 	}
 }
