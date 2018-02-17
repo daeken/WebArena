@@ -75,13 +75,7 @@ namespace WebArena {
 			Textures = textures.Select(x => LoadTexture(x, clamp)).ToArray();
 		}
 
-		Texture LoadTexture(string texture, bool clamp) {
-			var elems = texture.Split("/");
-			var fn = elems[elems.Length - 1];
-			if(fn.EndsWith(".tga"))
-				fn = fn.Substr(0, fn.Length - 3) + "png";
-			return new Texture($"textures/{fn}", clamp);
-		}
+		Texture LoadTexture(string texture, bool clamp) => new Texture($"assets/{texture}", clamp);
 
 		public void Use(Action<Program> setupAttributes, Texture lightmap) {
 			Program.Use();

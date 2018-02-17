@@ -1,26 +1,23 @@
-﻿using System.IO;
+﻿using System;
+using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using MoreLinq;
 
 namespace Converter {
 	public class BinaryFileReader {
-		readonly FileStream Fp;
-		public BinaryFileReader(string fn) {
-			Fp = File.OpenRead(fn);
-		}
+		readonly byte[] Data;
+		int offset;
+		public BinaryFileReader(byte[] data) => Data = data;
 
-		public void Seek(int addr) => Fp.Seek(addr, SeekOrigin.Begin);
+		public void Seek(int addr) => offset = addr;
 
-		public byte[] ReadBytes(int count) {
-			var ret = new byte[count];
-			Fp.Read(ret, 0, count);
-			return ret;
-		}
+		public byte[] ReadBytes(int count) => Data.Slice((offset += count) - count, count).ToArray();
 
 		public T ReadStruct<T>(int addr = -1) {
 			if(addr != -1) Seek(addr);
-			var bytes = new byte[Marshal.SizeOf<T>()];
-			Fp.Read(bytes, 0, bytes.Length);
+			var bytes = ReadBytes(Marshal.SizeOf<T>());
 			var handle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
 			var ret = Marshal.PtrToStructure<T>(handle.AddrOfPinnedObject());
 			handle.Free();

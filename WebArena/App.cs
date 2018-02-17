@@ -68,9 +68,9 @@ namespace WebArena {
 			try {
 				var map = CurrentMap = new Bsp(await AssetManager.Get<BspData>("q3tourney2.json"));
 				Scene.Add(map);
-				var sarge = new PlayerModel(await AssetManager.Get<Md3Data>("head.json"), await AssetManager.Get<Md3Data>("upper.json"),
+				/*var sarge = new PlayerModel(await AssetManager.Get<Md3Data>("head.json"), await AssetManager.Get<Md3Data>("upper.json"),
 					await AssetManager.Get<Md3Data>("lower.json")) {Position = vec3(100.0, 24.0, 100)};
-				Scene.Add(sarge);
+				Scene.Add(sarge);*/
 				OnFrame();
 			} catch(Exception e) {
 				WriteLine(e);

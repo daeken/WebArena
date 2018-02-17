@@ -12,7 +12,7 @@ using Newtonsoft.Json;
 using JbspMaterial = System.Collections.Generic.List<Converter.BspConverter.MaterialPass>;
 
 namespace Converter {
-	public class BspConverter {
+	static class BspConverter {
 		[StructLayout(LayoutKind.Sequential)]
 		struct BspHeader {
 			public readonly uint Magic;
@@ -91,11 +91,11 @@ namespace Converter {
 		
 		[StructLayout(LayoutKind.Sequential)]
 		struct BspVertex {
-			public readonly Vec3 Position;
-			public readonly Vec2 TexCoord, LmCoord;
-			public readonly Vec3 Normal;
+			public Vec3 Position;
+			public Vec2 TexCoord, LmCoord;
+			public Vec3 Normal;
 			[MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
-			public readonly byte[] Color;
+			public byte[] Color;
 		}
 		
 		[StructLayout(LayoutKind.Sequential)]
@@ -176,7 +176,7 @@ namespace Converter {
 			public int[] Blend;
 		}
 		
-		int[] AdjustBrightness(byte[] ipixels) {
+		static int[] AdjustBrightness(byte[] ipixels) {
 			var rpixels = new int[ipixels.Length];
 			for(var i = 0; i < ipixels.Length; i += 3) {
 				double r = ipixels[i + 0] * 4.0, g = ipixels[i + 1] * 4.0, b = ipixels[i + 2] * 4.0;
@@ -191,7 +191,7 @@ namespace Converter {
 			return rpixels;
 		}
 
-		(List<int>, List<PVertex>) SplitMesh(List<int> indices, List<PVertex> vertices) {
+		static (List<int>, List<PVertex>) SplitMesh(List<int> indices, List<PVertex> vertices) {
 			var indmap = new Dictionary<int, int>();
 			var outindices = new List<int>();
 			var outvertices = new List<PVertex>();
@@ -210,7 +210,7 @@ namespace Converter {
 			return (outindices, outvertices);
 		}
 
-		JbspMaterial CopyMaterial(JbspMaterial material) => material.Select(pass => new MaterialPass {
+		static JbspMaterial CopyMaterial(JbspMaterial material) => material.Select(pass => new MaterialPass {
 			Clamp = pass.Clamp, 
 			FragShader = pass.FragShader, 
 			Texture = pass.Texture, 
@@ -218,10 +218,67 @@ namespace Converter {
 			Blend = pass.Blend?.Select(x => x).ToArray()
 		}).ToList();
 
-		public BspConverter(string fn) {
+		static (List<int>, List<BspVertex>) Tesselate(int[] size, List<BspVertex> verts, List<int> meshverts) {
+			BspVertex GetPoint(BspVertex c0, BspVertex c1, BspVertex c2, double dist) {
+				Vec4 Sub(Vec4 v0, Vec4 v1, Vec4 v2) {
+					var b = 1 - dist;
+					return v0 * (b * b) + v1 * (2 * b * dist) + v2 * (dist * dist);
+				}
+				return new BspVertex {
+					Position = Sub(c0.Position, c1.Position, c2.Position), 
+					Normal = Sub(c0.Normal, c1.Normal, c2.Normal).Normalized, 
+					TexCoord = Sub(c0.TexCoord, c1.TexCoord, c2.TexCoord), 
+					LmCoord = Sub(c0.LmCoord, c1.LmCoord, c2.LmCoord) 
+				};
+			}
+			
+			var level = 5.0;
+			var L1 = (int) level + 1;
+
+			for(var py = 0; py < size[1] - 2; py += 2) {
+				for(var px = 0; px < size[0] - 2; px += 2) {
+					var rowOff = py * size[0];
+					BspVertex c0 = verts[rowOff + px + 0], c1 = verts[rowOff + px + 1], c2 = verts[rowOff + px + 2];
+					rowOff += size[0];
+					BspVertex c3 = verts[rowOff + px + 0], c4 = verts[rowOff + px + 1], c5 = verts[rowOff + px + 2];
+					rowOff += size[0];
+					BspVertex c6 = verts[rowOff + px + 0], c7 = verts[rowOff + px + 1], c8 = verts[rowOff + px + 2];
+
+					var indexOff = verts.Count;
+					for(var i = 0; i < L1; ++i)
+						verts.Add(GetPoint(c0, c3, c6, i / level));
+
+					for(var i = 1; i < L1; ++i) {
+						var a = i / level;
+
+						var tc0 = GetPoint(c0, c1, c2, a);
+						var tc1 = GetPoint(c3, c4, c5, a);
+						var tc2 = GetPoint(c6, c7, c8, a);
+
+						for(var j = 0; j < L1; ++j)
+							verts.Add(GetPoint(tc0, tc1, tc2, j / level));
+					}
+					
+					for(var row = 0; row < level; ++row)
+					for(var col = 0; col < level; ++col) {
+						meshverts.Add(indexOff + (row + 1) * L1 + col);
+						meshverts.Add(indexOff + row * L1 + col);
+						meshverts.Add(indexOff + row * L1 + col + 1);
+						
+						meshverts.Add(indexOff + (row + 1) * L1 + col);
+						meshverts.Add(indexOff + row * L1 + col + 1);
+						meshverts.Add(indexOff + (row + 1) * L1 + col + 1);
+					}
+				}
+			}
+			
+			return (meshverts, verts);
+		}
+
+		public static void Convert(byte[] istream, Stream ostream) {
 			var materials = JsonConvert.DeserializeObject<Dictionary<string, JbspMaterial>>(File.ReadAllText("materials.json"));
 			
-			var bread = new BinaryFileReader(fn);
+			var bread = new BinaryFileReader(istream);
 			var header = bread.ReadStruct<BspHeader>();
 			Debug.Assert(header.Magic == 0x50534249);
 
@@ -251,7 +308,7 @@ namespace Converter {
 					outindices[face.Texture] = new Dictionary<int, List<int>>();
 				if(!outindices[face.Texture].ContainsKey(face.LmIndex))
 					outindices[face.Texture][face.LmIndex] = new List<int>();
-				var fmv = meshverts.Slice(face.MeshVert, face.MeshVertCount).Select(mv => mv.Offset);
+				var fmv = meshverts.Slice(face.MeshVert, face.MeshVertCount).Select(mv => mv.Offset).ToList();
 				var fv = vertices.Slice(face.Vertex, face.VertexCount).ToList();
 				var ci = outindices[face.Texture][face.LmIndex];
 				switch(face.Type) {
@@ -266,6 +323,15 @@ namespace Converter {
 							});
 						break;
 					case 2:
+						(fmv, fv) = Tesselate(face.Size, fv, fmv);
+						outindices[face.Texture][face.LmIndex] = ci.Concat(fmv.Select(mv => mv + outvertices.Count)).ToList();
+						foreach(var vert in fv)
+							outvertices.Add(new PVertex {
+								Position = vert.Position, 
+								Normal = vert.Normal, 
+								TexCoord = vert.TexCoord, 
+								LmCoord = vert.LmCoord
+							});
 						break;
 					case 4: // Billboards
 						break;
@@ -305,11 +371,17 @@ namespace Converter {
 				var name = textures[mkey].Name;
 
 				JbspMaterial material;
-				if(materials.ContainsKey(name))
+				if(materials.ContainsKey(name)) {
 					material = materials[name];
-				else {
+					foreach(var pass in material) {
+						pass.Texture = TextureConverter.Instance.Convert(pass.Texture);
+						if(pass.AnimTex != null)
+							for(var i = 1; i < pass.AnimTex.Count; ++i)
+								pass.AnimTex[i] = TextureConverter.Instance.Convert(pass.AnimTex[i]);
+					}
+				}  else {
 					material = CopyMaterial(materials["plaintexture"]);
-					material[0].Texture = name + ".jpg";
+					material[0].Texture = TextureConverter.Instance.Convert(name + ".jpg");
 				}
 
 				outmaterials[mkey] = material;
@@ -337,7 +409,8 @@ namespace Converter {
 				Lightmaps = lightmaps.Select(lm => AdjustBrightness(lm.Pixels)).ToArray()
 			};
 			
-			WriteLine(JsonConvert.SerializeObject(output));
+			using(var tw = new StreamWriter(ostream))
+				tw.Write(JsonConvert.SerializeObject(output));
 		}
 	}
 }
