@@ -5,6 +5,7 @@ using System.Reflection.Metadata.Ecma335;
 using System.Security.Cryptography;
 using Pfim;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using static System.Console;
 
 namespace Converter {
@@ -40,7 +41,7 @@ namespace Converter {
 
 		string AddFile(byte[] data, string ext) {
 			var fn = string.Join("", MD5.Create().ComputeHash(data).Select(x => $"{x:X02}")) + "." + ext;
-			using(var fp = File.Open("output/" + fn, FileMode.Create))
+			using(var fp = Program.CreateFile($"output/textures/{fn}"))
 				fp.Write(data, 0, data.Length);
 			return fn;
 		}
@@ -60,7 +61,23 @@ namespace Converter {
 					return AddFile(ms.GetBuffer(), "png");
 				}
 			} catch {
-				return null;
+				try {
+					var tga = Targa.Create(new MemoryStream(data));
+					var im = Image.LoadPixelData<Rgb24>(tga.Data, tga.Width, tga.Height);
+					for(var x = 0; x < im.Width; ++x) {
+						for(var y = 0; y < im.Height; ++y) {
+							var p = im[x, y];
+							im[x, y] = new Rgb24 { R = p.B, G = p.G, B = p.R };
+						}
+					}
+					using(var ms = new MemoryStream()) {
+						im.SaveAsPng(ms);
+						return AddFile(ms.GetBuffer(), "png");
+					}
+
+				} catch {
+					return null;
+				}
 			}
 		}
 

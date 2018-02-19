@@ -39,6 +39,11 @@ namespace WebArena {
 					gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
 				gl.GenerateMipmap(gl.TEXTURE_2D);
 			};
+			image.OnError = (_, __, ___, ____, e) => {
+				WriteLine($"Error loading image {fn}!");
+				WriteLine(e);
+				return true;
+			};
 			image.Src = fn;
 		}
 		public Texture(byte[] pixels, int width, int height, int components) {

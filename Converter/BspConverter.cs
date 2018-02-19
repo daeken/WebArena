@@ -16,10 +16,13 @@ namespace Converter {
 	static class BspConverter {
 		[StructLayout(LayoutKind.Sequential)]
 		struct BspHeader {
-			public readonly uint Magic;
+			[MarshalAs(UnmanagedType.ByValArray, SizeConst=4)]
+			public readonly byte[] MagicBytes;
 			public readonly int Version;
 			[MarshalAs(UnmanagedType.ByValArray, SizeConst=17)]
 			public readonly BspDirEntry[] DirEntries;
+			
+			public string Magic => Program.BytesToString(MagicBytes);
 		}
 
 		[StructLayout(LayoutKind.Sequential)]
@@ -29,9 +32,11 @@ namespace Converter {
 
 		[StructLayout(LayoutKind.Sequential, CharSet=CharSet.Ansi)]
 		struct BspTexture {
-			[MarshalAs(UnmanagedType.ByValTStr, SizeConst=64)]
-			public readonly string Name;
+			[MarshalAs(UnmanagedType.ByValArray, SizeConst=64)]
+			public readonly byte[] NameBytes;
 			public readonly int SurfaceFlags, ContentFlags;
+			
+			public string Name => Program.BytesToString(NameBytes);
 		}
 
 		[StructLayout(LayoutKind.Sequential)]
@@ -106,9 +111,11 @@ namespace Converter {
 		
 		[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
 		struct BspEffect {
-			[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)]
-			public readonly string Name;
+			[MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
+			public readonly byte[] NameBytes;
 			public readonly int brush, VisibleSide;
+			
+			public string Name => Program.BytesToString(NameBytes);
 		}
 		
 		[StructLayout(LayoutKind.Sequential)]
@@ -339,9 +346,9 @@ namespace Converter {
 			
 			var bread = new BinaryFileReader(istream);
 			var header = bread.ReadStruct<BspHeader>();
-			Debug.Assert(header.Magic == 0x50534249);
+			Debug.Assert(header.Magic == "IBSP");
 
-			T[] GetLump<T>(int lump) => bread.ReadMaxStructs<T>(header.DirEntries[lump].Length, header.DirEntries[lump].Offset);
+			T[] GetLump<T>(int lump) where T : struct => bread.ReadMaxStructs<T>(header.DirEntries[lump].Length, header.DirEntries[lump].Offset);
 
 			var textures = GetLump<BspTexture>(1);
 			var planes = GetLump<BspPlane>(2);

@@ -27,6 +27,9 @@ namespace WebArena {
 
 		public static Vec3 Floor(Vec3 x) => vec3(Math.Floor(x.X), Math.Floor(x.Y), Math.Floor(x.Z));
 
+		public static Vec3 VMin(Vec3 a, Vec3 b) => vec3(Min(a.X, b.X), Min(a.Y, b.Y), Min(a.Z, b.Z));
+		public static Vec3 VMax(Vec3 a, Vec3 b) => vec3(Max(a.X, b.X), Max(a.Y, b.Y), Max(a.Z, b.Z));
+
 		public static double Lerp(double a, double b, double x) => (b - a) * x + a;
 		public static Vec3 Lerp(Vec3 a, Vec3 b, double x) => (b - a) * x + a;
 

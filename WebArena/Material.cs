@@ -75,7 +75,7 @@ namespace WebArena {
 			Textures = textures.Select(x => LoadTexture(x, clamp)).ToArray();
 		}
 
-		Texture LoadTexture(string texture, bool clamp) => new Texture($"assets/{texture}", clamp);
+		Texture LoadTexture(string texture, bool clamp) => new Texture($"assets/textures/{texture}", clamp);
 
 		public void Use(Action<Program> setupAttributes, Texture lightmap) {
 			Program.Use();

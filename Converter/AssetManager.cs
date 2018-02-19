@@ -17,11 +17,27 @@ namespace Converter {
 				} catch {}
 		}
 
+		public IEnumerable<string> FindFilesByPrefix(string prefix) {
+			foreach(var pak in Paks) {
+				foreach(var file in pak.Entries)
+					if(file.FullName.StartsWith(prefix))
+						yield return file.FullName;
+			}
+		}
+
 		public IEnumerable<string> FindFilesByExtension(string extension) {
 			extension = "." + extension.ToLower();
 			foreach(var pak in Paks) {
 				foreach(var file in pak.Entries)
 					if(file.FullName.EndsWith(extension))
+						yield return file.FullName;
+			}
+		}
+
+		public IEnumerable<string> FindFilesByNamePrefix(string prefix) {
+			foreach(var pak in Paks) {
+				foreach(var file in pak.Entries)
+					if(Path.GetFileName(file.FullName).StartsWith(prefix))
 						yield return file.FullName;
 			}
 		}

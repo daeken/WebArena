@@ -7,9 +7,18 @@ using static WebArena.Globals;
 
 namespace WebArena {
 	class PlayerModel : Node {
-		Node HeadNode, UpperNode, LowerNode;
+		readonly Node HeadNode, UpperNode, LowerNode, WeaponNode;
 
-		List<Tuple<Md3, Node, Md3, Node, string>> Attachments = new List<Tuple<Md3, Node, Md3, Node, string>>();
+		readonly List<Tuple<Md3, Node, Func<Md3>, Node, string>> Attachments = new List<Tuple<Md3, Node, Func<Md3>, Node, string>>();
+		
+		public Md3 Weapon {
+			get { return WeaponNode.Children.Count == 0 ? null : (Md3) WeaponNode.Children[0]; }
+			set {
+				WeaponNode.Children.Clear();
+				if(value != null)
+					WeaponNode.Add(value);
+			}
+		}
 
 		public PlayerModel(Md3Data head, Md3Data upper, Md3Data lower) {
 			var hm = new Md3(head);
@@ -24,13 +33,16 @@ namespace WebArena {
 			UpperNode.Add(um);
 			LowerNode = new Node();
 			LowerNode.Add(lm);
+			WeaponNode = new Node();
 
 			Add(HeadNode);
 			Add(UpperNode);
 			Add(LowerNode);
+			Add(WeaponNode);
 
-			Attachments.Add(new Tuple<Md3, Node, Md3, Node, string>(lm, LowerNode, um, UpperNode, "tag_torso"));
-			Attachments.Add(new Tuple<Md3, Node, Md3, Node, string>(um, UpperNode, hm, HeadNode, "tag_head"));
+			Attachments.Add(new Tuple<Md3, Node, Func<Md3>, Node, string>(lm, LowerNode, () => um, UpperNode, "tag_torso"));
+			Attachments.Add(new Tuple<Md3, Node, Func<Md3>, Node, string>(um, UpperNode, () => hm, HeadNode, "tag_head"));
+			Attachments.Add(new Tuple<Md3, Node, Func<Md3>, Node, string>(um, UpperNode, () => Weapon, WeaponNode, "tag_weapon"));
 		}
 
 		public override void Update() {
@@ -39,9 +51,11 @@ namespace WebArena {
 			foreach(var t in Attachments) {
 				var am = t.Item1;
 				var an = t.Item2;
-				var bm = t.Item3;
+				var bm = t.Item3();
 				var bn = t.Item4;
 				var tag = t.Item5;
+				if(bm == null)
+					continue;
 				var t1 = GetTag(am, an, tag);
 				var t2 = GetTag(bm, bn, tag);
 				bn.Position = an.Position + t1.Item1 - t2.Item1;

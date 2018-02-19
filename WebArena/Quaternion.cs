@@ -69,5 +69,10 @@ namespace WebArena {
 		public double Dot(Quaternion right) {
 			return X * right.X + Y * right.Y + Z * right.Z + W * right.W;
 		}
+		
+		public static Quaternion FromAxisAngle(Vec3 axis, double angle) {
+			axis = axis * Math.Sin(angle / 2);
+			return new Quaternion(axis.X, axis.Y, axis.Z, Math.Cos(angle / 2)).Normalized;
+		}
 	}
 }

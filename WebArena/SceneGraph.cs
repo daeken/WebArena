@@ -20,7 +20,7 @@ namespace WebArena {
 			Children.ForEach(x => x.Update());
 		}
 
-		public void Draw(bool transparent) {
+		public virtual void Draw(bool transparent) {
 			PushMatrix();
 			var temp = ModelMatrix;
 			ModelMatrix = Rotation.ToMatrix();

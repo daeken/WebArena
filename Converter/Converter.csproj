@@ -4,7 +4,25 @@
     <TargetFramework>netcoreapp2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Glob" Version="0.4.0" />
     <PackageReference Include="morelinq" Version="2.10.0" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.1-beta3" />
+    <PackageReference Include="Pfim" Version="0.4.4" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-beta0002" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="output\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Remove="output\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="output\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="materials.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="test.json" />
   </ItemGroup>
 </Project>
