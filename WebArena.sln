@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebArenaClient", "WebArena\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Converter", "Converter\Converter.csproj", "{437576A7-8EFF-4705-A467-927C794DB002}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server", "Server\Server.csproj", "{1B19F9C6-BD0F-4001-B2F6-131DED733924}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Common", "Common\Common.shproj", "{4F184170-5468-4A8A-ADB0-23DC7946F784}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,10 @@ Global
 		{437576A7-8EFF-4705-A467-927C794DB002}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{437576A7-8EFF-4705-A467-927C794DB002}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{437576A7-8EFF-4705-A467-927C794DB002}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B19F9C6-BD0F-4001-B2F6-131DED733924}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B19F9C6-BD0F-4001-B2F6-131DED733924}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B19F9C6-BD0F-4001-B2F6-131DED733924}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B19F9C6-BD0F-4001-B2F6-131DED733924}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

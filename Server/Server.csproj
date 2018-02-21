@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Serac, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\Serac\WebServer\bin\Debug\netcoreapp2.0\Serac.dll</HintPath>
+    </Reference>
+    <Reference Include="Serac.Static, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\Serac\Static\bin\Debug\netcoreapp2.0\Serac.Static.dll</HintPath>
+    </Reference>
+    <Reference Include="Serac.WebSockets, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\Serac\WebSockets\bin\Debug\netcoreapp2.0\Serac.WebSockets.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
+  </ItemGroup>
+  <Import Project="..\Common\Common.projitems" Label="Shared" />
+</Project>

@@ -1,0 +1,30 @@
+---
+
+enums:
+  Weapon:
+    - Gauntlet
+    - MachineGun
+    - Shotgun
+    - GrenadeLauncher
+    - RocketLauncher
+    - LightningGun
+    - Railgun
+    - PlasmaGun
+    - BFG
+
+  PowerUp:
+    - Flight
+    - BattleSuit
+    - PersonalTeleporter
+    - PersonalMedkit
+    - QuadDamage
+    - Haste
+    - FiveHealth
+
+structs:
+  MapChange:
+    - string: Name, Path
+
+  WeaponSpawn:
+    - Weapon: Weapon
+    - vec3: Position

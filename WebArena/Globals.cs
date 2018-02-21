@@ -4,8 +4,12 @@ using System.Collections.Generic;
 
 namespace WebArena {
 	static partial class Globals {
+		public static double StartTime;
 		public static double CurTime => new Date().GetTime() / 1000;
 		public static double Time;
+		public static Gui GuiInstance;
+		public static Input InputInstance;
+		public static Draw DrawInstance;
 		public static WebGLRenderingContext gl;
 		public static SceneGraph Scene;
 		public static Camera PlayerCamera;

@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 
 namespace WebArena {
 	public struct Vec2 {
 		public double X, Y;
-		public double Length => (double) Math.Sqrt(X * X + Y * Y);
+		public double Length => Math.Sqrt(X * X + Y * Y);
 		public Vec2 Normalized {
 			get {
 				var len = Length;

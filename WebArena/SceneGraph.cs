@@ -10,7 +10,7 @@ namespace WebArena {
 	class Node : IDrawable {
 		public Vec3 Position;
 		public Quaternion Rotation;
-		public List<IDrawable> Children = new List<IDrawable>();
+		public readonly List<IDrawable> Children = new List<IDrawable>();
 
 		public void Add(IDrawable drawable) {
 			Children.Add(drawable);
@@ -28,6 +28,10 @@ namespace WebArena {
 			ModelMatrix *= Mat4.Translation(Position);
 			Children.ForEach(x => x.Draw(transparent));
 			PopMatrix();
+		}
+
+		public void Clear() {
+			Children.Clear();
 		}
 	}
 

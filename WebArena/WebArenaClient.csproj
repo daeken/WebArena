@@ -36,10 +36,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="App.cs" />
     <Compile Include="AssetManager.cs" />
     <Compile Include="Bsp.cs" />
     <Compile Include="Camera.cs" />
+    <Compile Include="Game.cs" />
+    <Compile Include="Gui.cs" />
+    <Compile Include="Input.cs" />
     <Compile Include="Md3.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Globals.cs" />
@@ -57,7 +59,6 @@
     <Compile Include="SceneGraph.cs" />
     <Compile Include="SpinningItem.cs" />
     <Compile Include="Texture.cs" />
-    <Compile Include="Vectors.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="bridge.json" />
@@ -86,4 +87,5 @@
     <Error Condition="!Exists('..\packages\Bridge.Min.16.7.1\build\Bridge.Min.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Bridge.Min.16.7.1\build\Bridge.Min.targets'))" />
   </Target>
   <Import Project="..\packages\Bridge.Min.16.7.1\build\Bridge.Min.targets" Condition="Exists('..\packages\Bridge.Min.16.7.1\build\Bridge.Min.targets')" />
+  <Import Project="..\Common\Common.projitems" Label="Shared" />
 </Project>
