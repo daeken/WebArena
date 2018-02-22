@@ -15,14 +15,19 @@ namespace Converter {
 		
 		static void Main(string[] args) {
 			AssetManager.Instance.AddSource("../tools/baseq3");
-			foreach(var fn in AssetManager.Instance.FindFilesByExtension("bsp")) {
+			using(var sfp = CreateFile("output/materials.json"))
+				foreach(var fn in AssetManager.Instance.FindFilesByExtension("shader")) {
+					WriteLine($"Converting {fn}");
+					ShaderConverter.Convert(AssetManager.Instance.Open(fn), sfp);
+				}
+			/*foreach(var fn in AssetManager.Instance.FindFilesByExtension("bsp")) {
 				WriteLine($"Converting {fn}");
 				BspConverter.Convert(AssetManager.Instance.Open(fn), CreateFile($"output/{Path.ChangeExtension(fn, null)}.json"));
 			}
 			foreach(var fn in AssetManager.Instance.FindFilesByExtension("md3")) {
 				WriteLine($"Converting {fn}");
 				Md3Converter.Convert(fn, AssetManager.Instance.Open(fn), CreateFile($"output/{Path.ChangeExtension(fn, null)}.json"));
-			}
+			}*/
 		}
 	}
 }
