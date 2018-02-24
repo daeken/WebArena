@@ -7,12 +7,43 @@ using static System.Console;
 using static WebArena.Globals;
 
 namespace WebArena {
+	interface ITexture {
+		void Use();
+	}
+
+	class SingleTex : ITexture {
+		readonly Texture Texture;
+
+		internal SingleTex(string path, bool clamp) {
+			Texture = new Texture($"assets/textures/{path}", clamp);
+		}
+
+		public void Use() {
+			Texture.Use();
+		}
+	}
+
+	class MultiTex : ITexture {
+		readonly Texture[] Textures;
+		readonly double Frequency;
+
+		internal MultiTex(string[] paths, double freq) {
+			Textures = paths.Select(path => new Texture($"assets/textures/{path}", false)).ToArray();
+			Frequency = freq;
+		}
+
+		public void Use() {
+			Textures[(int) (Time * Frequency) % Textures.Length].Use();
+		}
+	}
+	
 	class Material {
 		int BlendSrc = -1, BlendDest = -1;
 		protected Program Program;
-		double TextureFreq;
-		Texture[] Textures = null;
-		public bool Transparent => BlendSrc != -1 && !(BlendSrc == 1 && BlendDest == 0);
+		readonly List<ITexture> Textures = new List<ITexture>();
+		public bool Transparent => BlendSrc != -1 && !(BlendSrc == 1 && BlendDest == 0) || AlphaTested;
+		public bool AlphaTested;
+		public bool? DepthWrite;
 
 		protected static string FauxDiffuseFS = @"
 			precision highp float;
@@ -71,29 +102,28 @@ namespace WebArena {
 		}
 
 		public void AddTextures(double freq, string[] textures, bool clamp) {
-			TextureFreq = freq;
-			Textures = textures.Select(x => LoadTexture(x, clamp)).ToArray();
+			if(textures.Length == 1)
+				Textures.Add(new SingleTex(textures[0], clamp));
+			else
+				Textures.Add(new MultiTex(textures, freq));
 		}
 
-		Texture LoadTexture(string texture, bool clamp) => new Texture($"assets/textures/{texture}", clamp);
-
 		public void Use(Action<Program> setupAttributes, Texture lightmap) {
+			gl.DepthMask(DepthWrite == true || !Transparent);
+			
 			Program.Use();
 			Program.SetUniform("uProjectionMatrix", ProjectionMatrix);
 			Program.SetUniform("uModelMatrix", ModelMatrix);
 			Program.SetUniform("uViewMatrix", PlayerCamera.Matrix);
 			Program.SetUniform("uTime", Time);
-			if(Textures != null) {
-				gl.ActiveTexture(gl.TEXTURE0);
-				var ti = 0;
-				if(TextureFreq != 0)
-					ti = (int) (Time * TextureFreq) % Textures.Length;
-				Textures[ti].Use();
-				Program.SetUniform("uTexSampler", 0);
-			}
-			gl.ActiveTexture(gl.TEXTURE1);
+			gl.ActiveTexture(gl.TEXTURE0);
 			lightmap.Use();
-			Program.SetUniform("uLmSampler", 1);
+			Program.SetUniform("uLmSampler", 0);
+			for(var i = 1; i <= Textures.Count; ++i) {
+				gl.ActiveTexture(gl.TEXTURE0 + i);
+				Textures[i - 1].Use();
+				Program.SetUniform($"uTexSampler{i - 1}", i);
+			}
 
 			if(!Transparent)
 				gl.Disable(gl.BLEND);

@@ -43,14 +43,15 @@ namespace Converter {
 		}
 
 		public byte[] Open(string name) {
-			foreach(var pak in Paks) {
-				var entry = pak.GetEntry(name);
-				if(entry != null) {
-					var bytes = new byte[entry.Length];
-					entry.Open().Read(bytes, 0, bytes.Length);
-					return bytes;
+			lock(Paks)
+				foreach(var pak in Paks) {
+					var entry = pak.GetEntry(name);
+					if(entry != null) {
+						var bytes = new byte[entry.Length];
+						entry.Open().Read(bytes, 0, bytes.Length);
+						return bytes;
+					}
 				}
-			}
 			return null;
 		}
 	}

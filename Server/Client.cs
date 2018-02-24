@@ -13,7 +13,7 @@ namespace WebArena {
 		public async Task Run() {
 			await SendMessage(new MapChange {Path = "maps/q3tourney2.json"});
 			await Task.Delay(15000);
-			await SendMessage(new MapChange {Path = "maps/q3dm4.json"});
+			//await SendMessage(new MapChange {Path = "maps/q3dm4.json"});
 			while(true) {
 				var msg = ParseMessage(await Socket.ReadBinary());
 				WriteLine($"Got message '{msg}'");

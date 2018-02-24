@@ -10,8 +10,6 @@ using System.Text;
 using MoreLinq;
 using Newtonsoft.Json;
 
-using JbspMaterial = System.Collections.Generic.List<Converter.BspConverter.MaterialPass>;
-
 namespace Converter {
 	static class BspConverter {
 		[StructLayout(LayoutKind.Sequential)]
@@ -140,7 +138,7 @@ namespace Converter {
 
 		class JbspFile {
 			public List<Dictionary<string, string>> Entities;
-			public Dictionary<int, JbspMaterial> Materials;
+			public Dictionary<int, JLayer[]> Materials;
 			public JbspMesh[] Meshes;
 			public JbspPlane[] Planes;
 			public JbspBrush[] Brushes;
@@ -177,14 +175,6 @@ namespace Converter {
 			public Vec2 TexCoord, LmCoord;
 		}
 		
-		public class MaterialPass {
-			public bool Clamp;
-			public string FragShader;
-			public string Texture;
-			public List<string> AnimTex;
-			public int[] Blend;
-		}
-		
 		static int[] AdjustBrightness(byte[] ipixels) {
 			var rpixels = new int[ipixels.Length];
 			for(var i = 0; i < ipixels.Length; i += 3) {
@@ -219,13 +209,16 @@ namespace Converter {
 			return (outindices, outvertices);
 		}
 
-		static JbspMaterial CopyMaterial(JbspMaterial material) => material.Select(pass => new MaterialPass {
-			Clamp = pass.Clamp, 
-			FragShader = pass.FragShader, 
-			Texture = pass.Texture, 
-			AnimTex = pass.AnimTex?.Select(x => x).ToList(), 
-			Blend = pass.Blend?.Select(x => x).ToArray()
-		}).ToList();
+		static JLayer[] CopyMaterial(JLayer[] material) => material.Select(layer => new JLayer {
+			FragShader = layer.FragShader, 
+			Blend = layer.Blend?.Select(x => x).ToArray(), 
+			Textures = layer.Textures.Select(tex => new JTexture {
+				AnimTex = tex.AnimTex?.Select(y => y).ToArray(), 
+				Clamp = tex.Clamp, 
+				Frequency = tex.Frequency, 
+				Texture = tex.Texture
+			}).ToArray()
+		}).ToArray();
 
 		static (List<int>, List<BspVertex>) Tesselate(int[] size, List<BspVertex> verts, List<int> meshverts) {
 			BspVertex GetPoint(BspVertex c0, BspVertex c1, BspVertex c2, double dist) {
@@ -342,7 +335,7 @@ namespace Converter {
 		}
 
 		public static void Convert(byte[] istream, Stream ostream) {
-			var materials = JsonConvert.DeserializeObject<Dictionary<string, JbspMaterial>>(File.ReadAllText("materials.json"));
+			var materials = JsonConvert.DeserializeObject<Dictionary<string, JLayer[]>>(File.ReadAllText("output/materials.json"));
 			
 			var bread = new BinaryFileReader(istream);
 			var header = bread.ReadStruct<BspHeader>();
@@ -433,24 +426,26 @@ namespace Converter {
 				}
 			}
 
-			var outmaterials = new Dictionary<int, JbspMaterial>();
+			var outmaterials = new Dictionary<int, JLayer[]>();
 			var outmeshes = new List<JbspMesh>();
 
 			foreach(var mkey in outindices.Keys) {
 				var name = textures[mkey].Name;
 
-				JbspMaterial material;
+				JLayer[] material;
 				if(materials.ContainsKey(name)) {
 					material = materials[name];
-					foreach(var pass in material) {
-						pass.Texture = TextureConverter.Instance.Convert(pass.Texture);
-						if(pass.AnimTex != null)
-							for(var i = 1; i < pass.AnimTex.Count; ++i)
-								pass.AnimTex[i] = TextureConverter.Instance.Convert(pass.AnimTex[i]);
+					foreach(var layer in material) {
+						foreach(var tex in layer.Textures) {
+							tex.Texture = TextureConverter.Instance.Convert(tex.Texture);
+							if(tex.AnimTex != null)
+								for(var i = 0; i < tex.AnimTex.Length; ++i)
+									tex.AnimTex[i] = TextureConverter.Instance.Convert(tex.AnimTex[i]);
+						}
 					}
-				}  else {
+				} else {
 					material = CopyMaterial(materials["plaintexture"]);
-					material[0].Texture = TextureConverter.Instance.Convert(name + ".jpg");
+					material[0].Textures[0].Texture = TextureConverter.Instance.Convert(name + ".jpg");
 				}
 
 				outmaterials[mkey] = material;
